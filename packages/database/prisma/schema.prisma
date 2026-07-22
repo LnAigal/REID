@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ApiKeyType {
+  LIVE
+  TEST
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+enum EmailStatus {
+  QUEUED
+  PROCESSING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  FAILED
+}
+
+enum EmailProvider {
+  BREVO
+  SES
+  MAILGUN
+  SMTP2GO
+  CUSTOM_SMTP
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          UserRole  @default(USER)
+  emailVerified Boolean   @default(false)
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  apiKeys    ApiKey[]
+  domains    Domain[]
+  emails     Email[]
+  templates  Template[]
+  auditLogs  AuditLog[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id        String     @id @default(cuid())
+  name      String
+  key       String     @unique
+  type      ApiKeyType
+  prefix    String
+  lastUsed  DateTime?
+  expiresAt DateTime?
+  isActive  Boolean    @default(true)
+  userId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emails Email[]
+
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
+}
+
+model Domain {
+  id             String       @id @default(cuid())
+  name           String       @unique
+  status         DomainStatus @default(PENDING)
+  verificationToken String
+  spfRecord      String?
+  dkimRecord     String?
+  dkimSelector   String?
+  dmarcRecord    String?
+  verifiedAt     DateTime?
+  userId         String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records DomainRecord[]
+  emails Email[]
+
+  @@index([userId])
+  @@index([name])
+  @@map("domains")
+}
+
+model DomainRecord {
+  id       String   @id @default(cuid())
+  type     String
+  name     String
+  value    String
+  status   String   @default("pending")
+  domainId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@map("domain_records")
+}
+
+model Email {
+  id          String        @id @default(cuid())
+  from        String
+  to          String[]
+  cc          String[]
+  bcc         String[]
+  replyTo     String?
+  subject     String
+  html        String?
+  text        String?
+  headers     Json?
+  status      EmailStatus   @default(QUEUED)
+  provider    EmailProvider @default(BREVO)
+  providerId  String?
+  latency     Int?
+  errorMessage String?
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  bouncedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  apiKeyId String?
+  domainId String?
+  userId   String
+
+  apiKey   ApiKey?   @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  domain   Domain?   @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  userIdField String @map("user_id")
+
+  user     User      @relation(fields: [userIdField], references: [id], onDelete: Cascade)
+  events   EmailEvent[]
+
+  @@index([userId])
+  @@index([apiKeyId])
+  @@index([domainId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("emails")
+}
+
+model EmailEvent {
+  id        String      @id @default(cuid())
+  type      String
+  data      Json?
+  emailId   String
+  createdAt DateTime    @default(now())
+
+  email Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
+
+  @@index([emailId])
+  @@index([type])
+  @@map("email_events")
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  name      String
+  subject   String
+  html      String
+  text      String?
+  variables Json?
+  isActive  Boolean  @default(true)
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("templates")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  resource  String
+  resourceId String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -1,0 +1,584 @@
+You are a senior staff software engineer, backend architect, DevOps engineer, UI/UX designer, security engineer, database architect, and product designer.
+
+Your task is to build a production-grade SaaS called REID.
+
+============================================================
+PRODUCT NAME
+============================================================
+
+REID
+
+Reliable Email Infrastructure for Developers.
+
+Tagline:
+"Reliable Email Infrastructure for Developers."
+
+REID is a modern developer-first email platform similar to Resend.
+
+The goal is NOT to clone Resend's UI.
+
+Instead, build an original product with better UX, beautiful design, modular architecture, and enterprise-grade code quality.
+
+The product should feel like something built by Linear, Vercel, Stripe, and Clerk.
+
+============================================================
+MISSION
+============================================================
+
+Allow developers to send transactional emails through one simple API.
+
+Developers should never need to deal with SMTP complexity.
+
+REID handles everything.
+
+============================================================
+DESIGN STYLE
+============================================================
+
+Modern
+
+Minimal
+
+Premium
+
+Developer-first
+
+Dark-first UI
+
+Rounded corners
+
+Smooth animations
+
+Beautiful typography
+
+Glassmorphism where appropriate
+
+Excellent spacing
+
+No clutter
+
+Stripe + Linear + Vercel inspired
+
+Fully responsive
+
+Desktop-first but perfect on mobile
+
+============================================================
+TECH STACK
+============================================================
+
+Frontend
+
+Next.js 15
+TypeScript
+Tailwind CSS
+shadcn/ui
+
+Backend
+
+NestJS
+
+ORM
+
+Prisma
+
+Database
+
+PostgreSQL
+
+Authentication
+
+JWT
+
+Password hashing
+
+bcrypt
+
+SMTP
+
+Initially Brevo
+
+Architecture should allow adding
+
+Amazon SES
+
+SMTP2GO
+
+Mailgun
+
+Custom SMTP
+
+without changing business logic.
+
+============================================================
+PROJECT STRUCTURE
+============================================================
+
+apps/
+
+dashboard
+
+api
+
+packages/
+
+database
+
+shared
+
+sdk-js
+
+ui
+
+docs
+
+============================================================
+CORE MODULES
+============================================================
+
+Authentication
+
+Dashboard
+
+API Keys
+
+Domains
+
+Email API
+
+Email Logs
+
+Analytics
+
+Templates (future-ready)
+
+Webhooks (future-ready)
+
+============================================================
+AUTHENTICATION
+============================================================
+
+Signup
+
+Login
+
+Logout
+
+Forgot Password
+
+Reset Password
+
+Email Verification
+
+JWT Authentication
+
+Secure Cookies
+
+Profile
+
+============================================================
+API KEYS
+============================================================
+
+Users can generate
+
+Live Keys
+
+Test Keys
+
+Example
+
+reid_live_xxxxxxxxx
+
+reid_test_xxxxxxxxx
+
+Allow
+
+Create
+
+Delete
+
+Regenerate
+
+Copy
+
+Permissions
+
+============================================================
+DOMAIN MANAGEMENT
+============================================================
+
+Users can
+
+Add Domain
+
+Verify Domain
+
+Delete Domain
+
+Show DNS Records
+
+Generate
+
+SPF
+
+DKIM
+
+DMARC
+
+Display verification status.
+
+============================================================
+EMAIL API
+============================================================
+
+POST /v1/emails
+
+Accept
+
+From
+
+To
+
+CC
+
+BCC
+
+Reply-To
+
+Subject
+
+HTML
+
+Plain Text
+
+Headers
+
+Future
+
+Attachments
+
+Inline Images
+
+Return structured JSON responses.
+
+Use proper HTTP status codes.
+
+============================================================
+EMAIL LOGS
+============================================================
+
+Store every email.
+
+Display
+
+Recipient
+
+Sender
+
+Status
+
+Provider
+
+Timestamp
+
+Latency
+
+Subject
+
+Statuses
+
+Queued
+
+Processing
+
+Sent
+
+Delivered
+
+Opened
+
+Clicked
+
+Bounced
+
+Failed
+
+============================================================
+ANALYTICS
+============================================================
+
+Dashboard should show
+
+Emails Sent
+
+Success Rate
+
+Failure Rate
+
+Bounce Rate
+
+Domains
+
+API Requests
+
+Charts
+
+Recent Activity
+
+============================================================
+DATABASE
+============================================================
+
+Design normalized production-ready schema.
+
+Tables
+
+users
+
+api_keys
+
+domains
+
+domain_records
+
+emails
+
+email_events
+
+templates
+
+logs
+
+Use Prisma.
+
+============================================================
+SMTP LAYER
+============================================================
+
+Never couple business logic directly to Brevo.
+
+Create an abstraction.
+
+MailProvider Interface
+
+Implement
+
+BrevoProvider
+
+Later
+
+SESProvider
+
+MailgunProvider
+
+SMTP2GOProvider
+
+CustomSMTPProvider
+
+Business logic should call
+
+mailProvider.send()
+
+only.
+
+============================================================
+ERROR HANDLING
+============================================================
+
+Beautiful API errors.
+
+Example
+
+{
+    "success": false,
+    "message": "...",
+    "code": "...",
+    "details": {}
+}
+
+============================================================
+SECURITY
+============================================================
+
+Helmet
+
+Rate Limiting
+
+Input Validation
+
+Zod
+
+CSRF Protection where applicable
+
+SQL Injection Prevention
+
+XSS Prevention
+
+JWT Expiration
+
+Secure Password Hashing
+
+Environment Variables
+
+Audit Logs
+
+============================================================
+PERFORMANCE
+============================================================
+
+Lazy Loading
+
+Pagination
+
+Caching Ready
+
+Optimized Queries
+
+Server Components where appropriate
+
+No unnecessary rerenders
+
+============================================================
+DOCUMENTATION
+============================================================
+
+Create
+
+Quick Start
+
+API Reference
+
+Authentication Guide
+
+Send Email Example
+
+Node.js Example
+
+cURL Example
+
+============================================================
+LANDING PAGE
+============================================================
+
+Hero
+
+Features
+
+Code Example
+
+Dashboard Preview
+
+Pricing (Coming Soon)
+
+Developer Experience
+
+FAQ
+
+Footer
+
+============================================================
+DASHBOARD
+============================================================
+
+Pages
+
+Overview
+
+Emails
+
+Domains
+
+API Keys
+
+Analytics
+
+Settings
+
+Profile
+
+Documentation
+
+============================================================
+UI REQUIREMENTS
+============================================================
+
+Beautiful empty states
+
+Loading skeletons
+
+Toast notifications
+
+Dialogs
+
+Command palette
+
+Search
+
+Responsive sidebar
+
+Dark Mode
+
+Keyboard shortcuts
+
+Premium interactions
+
+============================================================
+CODE QUALITY
+============================================================
+
+Strict TypeScript
+
+Reusable Components
+
+Clean Architecture
+
+Feature-based folders
+
+SOLID Principles
+
+No duplicated logic
+
+Proper comments
+
+Scalable architecture
+
+============================================================
+FUTURE READY
+============================================================
+
+Architecture should allow future modules without major refactoring.
+
+Future Modules
+
+REID Auth
+
+REID Storage
+
+REID Notifications
+
+REID Analytics
+
+============================================================
+DO NOT
+============================================================
+
+Do not build a clone.
+
+Do not copy Resend UI.
+
+Do not hardcode secrets.
+
+Do not tightly couple SMTP.
+
+Do not write spaghetti code.
+
+============================================================
+GOAL
+============================================================
+
+Build a production-quality SaaS that developers would genuinely enjoy using.
+
+Every component should be scalable, modular, secure, elegant, and maintainable.
+
+Think like a senior engineer building the next generation of developer infrastructure.
