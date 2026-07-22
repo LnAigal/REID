@@ -132,7 +132,11 @@ export class AuthService {
   }
 
   clearAuthCookie(res: Response) {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
   }
 
   private generateToken(payload: JwtPayload): string {
