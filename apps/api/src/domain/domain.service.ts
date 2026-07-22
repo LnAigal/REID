@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
+import * as dns from 'dns';
 
 @Injectable()
 export class DomainService {
+  private readonly logger = new Logger(DomainService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, name: string) {
@@ -68,7 +71,7 @@ export class DomainService {
   async verify(userId: string, domainId: string) {
     const domain = await this.findOne(userId, domainId);
 
-    const isVerified = true;
+    const isVerified = await this.verifyTxtRecord(domain.name, domain.verificationToken);
 
     if (isVerified) {
       return this.prisma.domain.update({
@@ -86,6 +89,16 @@ export class DomainService {
       data: { status: 'FAILED' },
       include: { records: true },
     });
+  }
+
+  private async verifyTxtRecord(domain: string, token: string): Promise<boolean> {
+    try {
+      const records = await dns.promises.resolveTxt(domain);
+      return records.some(record => record.join('').includes(token));
+    } catch (error) {
+      this.logger.warn(`DNS lookup failed for ${domain}: ${error.message}`);
+      return false;
+    }
   }
 
   async remove(userId: string, domainId: string) {
