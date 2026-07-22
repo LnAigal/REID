@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Request, Response } from 'express';
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
 
 class SignupDto {
   @IsEmail()
@@ -16,6 +16,9 @@ class SignupDto {
 
   @IsString()
   @MinLength(8)
+  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+  @Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
   password: string;
 }
 
@@ -44,6 +47,9 @@ class ChangePasswordDto {
 
   @IsString()
   @MinLength(8)
+  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+  @Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
   newPassword: string;
 }
 
