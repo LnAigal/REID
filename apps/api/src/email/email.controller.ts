@@ -76,16 +76,6 @@ export class EmailController {
     return { success: true, ...result };
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get email details' })
-  async getOne(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
-    const result = await this.emailService.getEmailById(user.id, id);
-    return { success: true, data: result };
-  }
-
   @Get('stats/overview')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -93,6 +83,16 @@ export class EmailController {
   async stats(@Req() req: Request) {
     const user = req.user as any;
     const result = await this.emailService.getEmailStats(user.id);
+    return { success: true, data: result };
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get email details' })
+  async getOne(@Req() req: Request, @Param('id') id: string) {
+    const user = req.user as any;
+    const result = await this.emailService.getEmailById(user.id, id);
     return { success: true, data: result };
   }
 }
