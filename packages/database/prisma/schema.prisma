@@ -149,13 +149,11 @@ model Email {
 
   apiKeyId String?
   domainId String?
-  userId   String
+  userId   String   @map("user_id")
 
-  apiKey   ApiKey?   @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
-  domain   Domain?   @relation(fields: [domainId], references: [id], onDelete: SetNull)
-  userIdField String @map("user_id")
-
-  user     User      @relation(fields: [userIdField], references: [id], onDelete: Cascade)
+  apiKey   ApiKey?  @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  domain   Domain?  @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   events   EmailEvent[]
 
   @@index([userId])

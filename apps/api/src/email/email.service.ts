@@ -38,7 +38,6 @@ export class EmailService {
         apiKeyId,
         domainId: domainRecord.id,
         userId,
-        userIdField: userId,
       },
     });
 
