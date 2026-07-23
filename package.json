@@ -9,6 +9,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
+    "lint:fix": "turbo lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:generate": "turbo db:generate",
     "db:push": "turbo db:push",
@@ -16,8 +17,12 @@
     "db:seed": "turbo db:seed"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.4.0",
     "turbo": "^2.4.0",
-    "prettier": "^3.4.0"
+    "typescript-eslint": "^8.65.0"
   },
   "engines": {
     "node": ">=20"
