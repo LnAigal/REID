@@ -1,10 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { User, Shield, Bell, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Shield, Trash2 } from "lucide-react";
+import { api } from "../../../lib/api";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
+  const [profile, setProfile] = useState<{ name: string; email: string } | null>(null);
+  const [name, setName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api.getProfile().then((r) => {
+      setProfile(r.data);
+      setName(r.data.name);
+    }).catch(() => {});
+  }, []);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      await api.updateProfile({ name });
+      setProfile((prev) => prev ? { ...prev, name } : prev);
+    } catch (e: any) {
+      alert(e.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.changePassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      alert("Password updated successfully");
+    } catch (e: any) {
+      alert(e.message || "Failed to change password");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -40,17 +85,15 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-4 mb-6">
                 <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xl font-bold">
-                  U
+                  {profile?.name?.[0]?.toUpperCase() || "U"}
                 </div>
-                <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-                  Change avatar
-                </button>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Name</label>
                 <input
                   type="text"
-                  defaultValue="User"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                 />
               </div>
@@ -58,13 +101,17 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Email</label>
                 <input
                   type="email"
-                  defaultValue="user@example.com"
+                  value={profile?.email || ""}
                   disabled
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white/50 cursor-not-allowed"
                 />
               </div>
-              <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200 transition-all">
-                Save Changes
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200 transition-all disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
@@ -80,6 +127,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Current Password</label>
                 <input
                   type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                 />
               </div>
@@ -87,6 +136,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">New Password</label>
                 <input
                   type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                 />
               </div>
@@ -94,24 +145,19 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Confirm New Password</label>
                 <input
                   type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                 />
               </div>
-              <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200 transition-all">
-                Update Password
+              <button
+                onClick={handleChangePassword}
+                disabled={saving}
+                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200 transition-all disabled:opacity-50"
+              >
+                {saving ? "Updating..." : "Update Password"}
               </button>
             </div>
-          </div>
-
-          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
-            <h3 className="text-lg font-medium text-red-400 mb-2">Danger Zone</h3>
-            <p className="text-sm text-zinc-400 mb-4">
-              Permanently delete your account and all associated data.
-            </p>
-            <button className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/30 transition-all flex items-center gap-2">
-              <Trash2 className="h-4 w-4" />
-              Delete Account
-            </button>
           </div>
         </div>
       )}

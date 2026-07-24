@@ -1,25 +1,35 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { api } from "../../../lib/api";
 
-const weeklyData = [
-  { date: "Mon", sent: 120, delivered: 118, failed: 2 },
-  { date: "Tue", sent: 98, delivered: 95, failed: 3 },
-  { date: "Wed", sent: 145, delivered: 142, failed: 3 },
-  { date: "Thu", sent: 167, delivered: 164, failed: 3 },
-  { date: "Fri", sent: 189, delivered: 185, failed: 4 },
-  { date: "Sat", sent: 78, delivered: 76, failed: 2 },
-  { date: "Sun", sent: 56, delivered: 55, failed: 1 },
-];
-
-const pieData = [
-  { name: "Delivered", value: 835, color: "#22c55e" },
-  { name: "Sent", value: 354, color: "#3b82f6" },
-  { name: "Failed", value: 19, color: "#ef4444" },
-  { name: "Bounced", value: 26, color: "#eab308" },
-];
+interface AnalyticsOverview {
+  total: number;
+  sent: number;
+  delivered: number;
+  failed: number;
+  bounced: number;
+}
 
 export default function AnalyticsPage() {
+  const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch(() => {});
+    api.getChartData(30).then((r) => setChartData(r.data)).catch(() => {});
+  }, []);
+
+  const pieData = overview ? [
+    { name: "Delivered", value: overview.delivered, color: "#22c55e" },
+    { name: "Sent", value: overview.sent, color: "#3b82f6" },
+    { name: "Failed", value: overview.failed, color: "#ef4444" },
+    { name: "Bounced", value: overview.bounced, color: "#eab308" },
+  ] : [];
+
+  const weeklyData = chartData.slice(-7);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -29,10 +39,10 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Sent", value: "1,234", color: "text-blue-400" },
-          { label: "Delivered", value: "1,198", color: "text-green-400" },
-          { label: "Failed", value: "19", color: "text-red-400" },
-          { label: "Bounced", value: "26", color: "text-yellow-400" },
+          { label: "Total Sent", value: overview?.total?.toLocaleString() ?? "—", color: "text-blue-400" },
+          { label: "Delivered", value: overview?.delivered?.toLocaleString() ?? "—", color: "text-green-400" },
+          { label: "Failed", value: overview?.failed?.toLocaleString() ?? "—", color: "text-red-400" },
+          { label: "Bounced", value: overview?.bounced?.toLocaleString() ?? "—", color: "text-yellow-400" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
             <p className="text-sm text-zinc-400 mb-1">{stat.label}</p>
@@ -116,7 +126,7 @@ export default function AnalyticsPage() {
             <LineChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={12} />
-              <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} domain={[90, 100]} />
+              <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} domain={[0, 100]} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "rgba(0,0,0,0.8)",
@@ -128,7 +138,7 @@ export default function AnalyticsPage() {
               />
               <Line
                 type="monotone"
-                dataKey={(data) => Math.round((data.delivered / data.sent) * 100)}
+                dataKey={(data) => data.sent > 0 ? Math.round((data.delivered / data.sent) * 100) : 0}
                 stroke="#22c55e"
                 strokeWidth={2}
                 dot={{ fill: "#22c55e", strokeWidth: 2 }}

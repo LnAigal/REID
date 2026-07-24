@@ -1,19 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { Key, Plus, Copy, Trash2, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Key, Plus, Copy, Trash2, RefreshCw } from "lucide-react";
+import { api } from "../../../lib/api";
 
-const apiKeys = [
-  { id: "1", name: "Production", prefix: "reid_live_a1b2...", type: "LIVE", lastUsed: "2 min ago", createdAt: "Jan 1, 2025" },
-  { id: "2", name: "Development", prefix: "reid_test_x7y8...", type: "TEST", lastUsed: "1 hour ago", createdAt: "Jan 5, 2025" },
-  { id: "3", name: "Staging", prefix: "reid_test_m3n4...", type: "TEST", lastUsed: "3 days ago", createdAt: "Jan 10, 2025" },
-];
+interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  type: string;
+  isActive: boolean;
+  lastUsed: string | null;
+  createdAt: string;
+}
 
 export default function ApiKeysPage() {
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newKey, setNewKey] = useState({ name: "", type: "LIVE" as "LIVE" | "TEST" });
-  const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
+  const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchKeys = () => {
+    api.getApiKeys()
+      .then((r) => setApiKeys(r.data))
+      .catch(() => setApiKeys([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchKeys(); }, []);
+
+  const handleCreate = async () => {
+    if (!newKey.name.trim()) return;
+    try {
+      const res = await api.createApiKey(newKey.name.trim(), newKey.type);
+      setNewKeyValue(res.data.key);
+      setNewKey({ name: "", type: "LIVE" });
+      fetchKeys();
+    } catch {
+      alert("Failed to create API key");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this API key?")) return;
+    try {
+      await api.deleteApiKey(id);
+      fetchKeys();
+    } catch {
+      alert("Failed to delete API key");
+    }
+  };
+
+  const handleRegenerate = async (id: string) => {
+    if (!confirm("Regenerate this API key? The old key will stop working immediately.")) return;
+    try {
+      const res = await api.regenerateApiKey(id);
+      setNewKeyValue(res.data.key);
+      fetchKeys();
+    } catch {
+      alert("Failed to regenerate API key");
+    }
+  };
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -37,6 +86,32 @@ export default function ApiKeysPage() {
         </button>
       </div>
 
+      {newKeyValue && (
+        <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-400">Key created successfully</p>
+              <p className="text-xs text-zinc-400 mt-1">Copy this key now — it won&apos;t be shown again.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <code className="text-sm font-mono text-zinc-300 bg-black/50 px-3 py-1 rounded">{newKeyValue}</code>
+              <button
+                onClick={() => copyToClipboard(newKeyValue, "new")}
+                className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setNewKeyValue(null)}
+                className="text-xs text-zinc-500 hover:text-white"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -51,53 +126,62 @@ export default function ApiKeysPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {apiKeys.map((apiKey) => (
-                <tr key={apiKey.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Key className="h-4 w-4 text-zinc-500" />
-                      <span className="text-sm font-medium">{apiKey.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <code className="text-sm font-mono text-zinc-400">{apiKey.prefix}</code>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                      apiKey.type === "LIVE"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-yellow-500/20 text-yellow-400"
-                    }`}>
-                      {apiKey.type}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-zinc-400">{apiKey.lastUsed}</td>
-                  <td className="px-4 py-3 text-sm text-zinc-500">{apiKey.createdAt}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => copyToClipboard(apiKey.prefix, apiKey.id)}
-                        className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
-                        title="Copy"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </button>
-                      <button
-                        className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
-                        title="Regenerate"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </button>
-                      <button
-                        className="rounded-lg p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-500">Loading...</td>
                 </tr>
-              ))}
+              ) : apiKeys.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-500">No API keys</td>
+                </tr>
+              ) : (
+                apiKeys.map((apiKey) => (
+                  <tr key={apiKey.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Key className="h-4 w-4 text-zinc-500" />
+                        <span className="text-sm font-medium">{apiKey.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <code className="text-sm font-mono text-zinc-400">{apiKey.prefix}</code>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        apiKey.type === "LIVE"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-yellow-500/20 text-yellow-400"
+                      }`}>
+                        {apiKey.type}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-zinc-400">
+                      {apiKey.lastUsed ? new Date(apiKey.lastUsed).toLocaleDateString() : "Never"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-zinc-500">
+                      {new Date(apiKey.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleRegenerate(apiKey.id)}
+                          className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+                          title="Regenerate"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(apiKey.id)}
+                          className="rounded-lg p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -145,10 +229,7 @@ export default function ApiKeysPage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  setNewKey({ name: "", type: "LIVE" });
-                }}
+                onClick={handleCreate}
                 className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200 transition-all"
               >
                 Create
