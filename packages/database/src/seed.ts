@@ -6,13 +6,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  const hashedPassword = await bcrypt.hash('Admin123!', 12);
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      'Seed requires SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD environment variables',
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   const user = await prisma.user.upsert({
-    where: { email: 'admin@reid.dev' },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: 'admin@reid.dev',
+      email: adminEmail,
       name: 'REID Admin',
       password: hashedPassword,
       emailVerified: true,
