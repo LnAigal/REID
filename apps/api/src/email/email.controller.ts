@@ -4,6 +4,7 @@ import { EmailService } from './email.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject } from 'class-validator';
+import { RequestUser } from '../types/request-user';
 
 class SendEmailDto {
   @IsEmail()
@@ -53,7 +54,7 @@ export class EmailController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send an email' })
   async send(@Req() req: Request, @Body() dto: SendEmailDto) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.emailService.send(user.id, dto);
     return { success: true, data: result };
   }
@@ -71,7 +72,7 @@ export class EmailController {
     @Query('limit') limit?: number,
     @Query('search') search?: string,
   ) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.emailService.getEmails(user.id, page || 1, limit || 20, search);
     return { success: true, ...result };
   }
@@ -81,7 +82,7 @@ export class EmailController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get email statistics' })
   async stats(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.emailService.getEmailStats(user.id);
     return { success: true, data: result };
   }
@@ -91,7 +92,7 @@ export class EmailController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get email details' })
   async getOne(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.emailService.getEmailById(user.id, id);
     return { success: true, data: result };
   }

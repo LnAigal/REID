@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Request, Response } from 'express';
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
+import { RequestUser } from '../types/request-user';
 
 class SignupDto {
   @IsEmail()
@@ -92,7 +93,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user!;
     const profile = await this.authService.getProfile(user.id);
     return { success: true, data: profile };
   }
@@ -102,7 +103,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update profile' })
   async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
-    const user = req.user as any;
+    const user = req.user!;
     const updated = await this.authService.updateProfile(user.id, dto);
     return { success: true, data: updated };
   }
@@ -112,7 +113,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password' })
   async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
-    const user = req.user as any;
+    const user = req.user!;
     return this.authService.changePassword(user.id, dto.currentPassword, dto.newPassword);
   }
 }

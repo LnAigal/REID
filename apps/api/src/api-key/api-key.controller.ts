@@ -4,6 +4,7 @@ import { ApiKeyService } from './api-key.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { IsString, IsEnum, MinLength, MaxLength } from 'class-validator';
+import { RequestUser } from '../types/request-user';
 
 class CreateApiKeyDto {
   @IsString()
@@ -25,7 +26,7 @@ export class ApiKeyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create an API key' })
   async create(@Req() req: Request, @Body() dto: CreateApiKeyDto) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.apiKeyService.create(user.id, dto.name, dto.type);
     return { success: true, data: result };
   }
@@ -35,7 +36,7 @@ export class ApiKeyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List API keys' })
   async list(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.apiKeyService.findAll(user.id);
     return { success: true, data: result };
   }
@@ -45,7 +46,7 @@ export class ApiKeyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an API key' })
   async remove(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
+    const user = req.user!;
     return this.apiKeyService.remove(user.id, id);
   }
 
@@ -54,7 +55,7 @@ export class ApiKeyController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Regenerate an API key' })
   async regenerate(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.apiKeyService.regenerate(user.id, id);
     return { success: true, data: result };
   }

@@ -4,6 +4,7 @@ import { TemplateService } from './template.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { IsString, MinLength, IsOptional } from 'class-validator';
+import { RequestUser } from '../types/request-user';
 
 class CreateTemplateDto {
   @IsString()
@@ -32,7 +33,7 @@ export class TemplateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a template' })
   async create(@Req() req: Request, @Body() dto: CreateTemplateDto) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.templateService.create(user.id, dto);
     return { success: true, data: result };
   }
@@ -42,7 +43,7 @@ export class TemplateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List templates' })
   async list(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.templateService.findAll(user.id);
     return { success: true, data: result };
   }
@@ -52,7 +53,7 @@ export class TemplateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get template details' })
   async getOne(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.templateService.findOne(user.id, id);
     return { success: true, data: result };
   }
@@ -62,7 +63,7 @@ export class TemplateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update template' })
   async update(@Req() req: Request, @Param('id') id: string, @Body() dto: Partial<CreateTemplateDto>) {
-    const user = req.user as any;
+    const user = req.user!;
     const result = await this.templateService.update(user.id, id, dto);
     return { success: true, data: result };
   }
@@ -72,7 +73,7 @@ export class TemplateController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete template' })
   async remove(@Req() req: Request, @Param('id') id: string) {
-    const user = req.user as any;
+    const user = req.user!;
     return this.templateService.remove(user.id, id);
   }
 }
