@@ -44,7 +44,9 @@ export class EmailService {
     this.prisma.email.update({
       where: { id: email.id },
       data: { status: 'PROCESSING' },
-    }).catch(() => {});
+    }).catch((err) => {
+      this.logger.warn(`Failed to update email ${email.id} status to PROCESSING: ${err.message}`);
+    });
 
     const result = await this.mailService.send(data);
 
