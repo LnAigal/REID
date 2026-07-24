@@ -31,16 +31,19 @@ export class TemplateService {
   }
 
   async update(userId: string, templateId: string, data: Partial<{ name: string; subject: string; html: string; text: string }>) {
-    await this.findOne(userId, templateId);
-    return this.prisma.template.update({
-      where: { id: templateId },
+    const template = await this.prisma.template.updateMany({
+      where: { id: templateId, userId },
       data,
     });
+    if (template.count === 0) throw new NotFoundException('Template not found');
+    return this.prisma.template.findFirst({ where: { id: templateId, userId } });
   }
 
   async remove(userId: string, templateId: string) {
-    await this.findOne(userId, templateId);
-    await this.prisma.template.delete({ where: { id: templateId } });
+    const result = await this.prisma.template.deleteMany({
+      where: { id: templateId, userId },
+    });
+    if (result.count === 0) throw new NotFoundException('Template not found');
     return { message: 'Template deleted successfully' };
   }
 }

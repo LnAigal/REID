@@ -75,7 +75,7 @@ export class DomainService {
 
     if (isVerified) {
       return this.prisma.domain.update({
-        where: { id: domainId },
+        where: { id: domainId, userId },
         data: {
           status: 'VERIFIED',
           verifiedAt: new Date(),
@@ -85,7 +85,7 @@ export class DomainService {
     }
 
     return this.prisma.domain.update({
-      where: { id: domainId },
+      where: { id: domainId, userId },
       data: { status: 'FAILED' },
       include: { records: true },
     });
@@ -102,8 +102,10 @@ export class DomainService {
   }
 
   async remove(userId: string, domainId: string) {
-    const domain = await this.findOne(userId, domainId);
-    await this.prisma.domain.delete({ where: { id: domainId } });
+    const result = await this.prisma.domain.deleteMany({
+      where: { id: domainId, userId },
+    });
+    if (result.count === 0) throw new NotFoundException('Domain not found');
     return { message: 'Domain deleted successfully' };
   }
 }
