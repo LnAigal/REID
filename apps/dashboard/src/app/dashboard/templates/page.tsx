@@ -8,6 +8,7 @@ interface Template {
   id: string;
   name: string;
   subject: string;
+  html: string;
   variables: Record<string, string> | null;
   createdAt: string;
 }
