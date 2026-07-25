@@ -41,8 +41,10 @@ async function bootstrap() {
     .addTag('analytics', 'Analytics and reporting')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = process.env.API_PORT || 3001;
   await app.listen(port);
