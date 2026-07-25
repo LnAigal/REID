@@ -41,11 +41,9 @@ export class EmailService {
       },
     });
 
-    this.prisma.email.update({
+    await this.prisma.email.update({
       where: { id: email.id },
       data: { status: 'PROCESSING' },
-    }).catch((err) => {
-      this.logger.warn(`Failed to update email ${email.id} status to PROCESSING: ${err.message}`);
     });
 
     const result = await this.mailService.send(data);
@@ -60,18 +58,19 @@ export class EmailService {
       updateData.errorMessage = result.error;
     }
 
-    const updatedEmail = await this.prisma.email.update({
-      where: { id: email.id },
-      data: updateData,
-    });
-
-    await this.prisma.emailEvent.create({
-      data: {
-        type: result.success ? 'sent' : 'failed',
-        data: result as any,
-        emailId: email.id,
-      },
-    });
+    const [updatedEmail] = await this.prisma.$transaction([
+      this.prisma.email.update({
+        where: { id: email.id },
+        data: updateData,
+      }),
+      this.prisma.emailEvent.create({
+        data: {
+          type: result.success ? 'sent' : 'failed',
+          data: result as any,
+          emailId: email.id,
+        },
+      }),
+    ]);
 
     if (!result.success) {
       throw new BadRequestException(result.error || 'Failed to send email');
