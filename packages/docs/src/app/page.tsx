@@ -78,7 +78,7 @@ export default function DocsPage() {
               <span className="text-xs text-zinc-500 font-mono">npm</span>
             </div>
             <pre className="p-4 text-sm font-mono text-zinc-300">
-              npm install @reid/sdk
+              npm install @repo/sdk
             </pre>
           </div>
 
@@ -87,7 +87,7 @@ export default function DocsPage() {
               <span className="text-xs text-zinc-500 font-mono">JavaScript</span>
             </div>
             <pre className="p-4 text-sm font-mono text-zinc-300 overflow-x-auto">
-{`import REID from '@reid/sdk';
+{`import REID from '@repo/sdk';
 
 const reid = new REID('reid_live_your_api_key');
 

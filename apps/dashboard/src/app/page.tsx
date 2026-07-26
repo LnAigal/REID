@@ -88,7 +88,7 @@ export default function LandingPage() {
               <span className="ml-2 text-xs text-zinc-500 font-mono">send-email.js</span>
             </div>
             <pre className="p-4 text-sm font-mono text-zinc-300 overflow-x-auto">
-              <code>{`import REID from '@reid/sdk';
+              <code>{`import REID from '@repo/sdk';
 
 const reid = new REID('reid_live_xxxxx');
 
