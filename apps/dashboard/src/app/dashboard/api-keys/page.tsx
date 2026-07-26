@@ -19,7 +19,6 @@ export default function ApiKeysPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newKey, setNewKey] = useState({ name: "", type: "LIVE" as "LIVE" | "TEST" });
   const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchKeys = () => {
@@ -64,10 +63,8 @@ export default function ApiKeysPage() {
     }
   };
 
-  const copyToClipboard = (text: string, id: string) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedKey(id);
-    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   return (
@@ -96,7 +93,7 @@ export default function ApiKeysPage() {
             <div className="flex items-center gap-2">
               <code className="text-sm font-mono text-zinc-300 bg-black/50 px-3 py-1 rounded">{newKeyValue}</code>
               <button
-                onClick={() => copyToClipboard(newKeyValue, "new")}
+                onClick={() => copyToClipboard(newKeyValue)}
                 className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
               >
                 <Copy className="h-4 w-4" />

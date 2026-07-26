@@ -4,7 +4,6 @@ import { TemplateService } from './template.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { IsString, MinLength, IsOptional } from 'class-validator';
-import { RequestUser } from '../types/request-user';
 
 class CreateTemplateDto {
   @IsString()

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, Plus, CheckCircle2, XCircle, Copy, Trash2 } from "lucide-react";
+import { Globe, Plus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { api } from "../../../lib/api";
 
 interface DomainRecord {

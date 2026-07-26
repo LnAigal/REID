@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Search, Filter, ChevronDown } from "lucide-react";
+import { Mail, Search } from "lucide-react";
 import { api } from "../../../lib/api";
 
 const statusColors: Record<string, string> = {
