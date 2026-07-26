@@ -27,7 +27,7 @@ export default function DomainsPage() {
   const fetchDomains = () => {
     api.getDomains()
       .then((r) => setDomains(r.data))
-      .catch(() => setDomains([]))
+      .catch((e) => { console.error("Failed to fetch domains:", e); setDomains([]); })
       .finally(() => setLoading(false));
   };
 

@@ -29,13 +29,14 @@ export default function DashboardOverview() {
   const [recentEmails, setRecentEmails] = useState<RecentEmail[]>([]);
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getEmailStats().then((r) => setStats(r.data)).catch(() => {});
-    api.getChartData(7).then((r) => setChartData(r.data)).catch(() => {});
-    api.getEmails(1, 5).then((r) => setRecentEmails(r.data)).catch(() => {});
-    api.getDomains().then((r) => setDomains(r.data)).catch(() => {});
-    api.getApiKeys().then((r) => setApiKeys(r.data)).catch(() => {});
+    api.getEmailStats().then((r) => setStats(r.data)).catch((e) => { console.error("Failed to fetch email stats:", e); setError("Failed to load dashboard data"); });
+    api.getChartData(7).then((r) => setChartData(r.data)).catch((e) => console.error("Failed to fetch chart data:", e));
+    api.getEmails(1, 5).then((r) => setRecentEmails(r.data)).catch((e) => console.error("Failed to fetch emails:", e));
+    api.getDomains().then((r) => setDomains(r.data)).catch((e) => console.error("Failed to fetch domains:", e));
+    api.getApiKeys().then((r) => setApiKeys(r.data)).catch((e) => console.error("Failed to fetch API keys:", e));
   }, []);
 
   const overviewStats = [
@@ -51,6 +52,12 @@ export default function DashboardOverview() {
         <h1 className="text-2xl font-bold">Overview</h1>
         <p className="text-zinc-400 text-sm mt-1">Welcome back. Here&apos;s your email infrastructure at a glance.</p>
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {overviewStats.map((stat) => (

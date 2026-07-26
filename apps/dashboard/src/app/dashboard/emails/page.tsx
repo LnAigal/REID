@@ -33,7 +33,7 @@ export default function EmailsPage() {
     setLoading(true);
     api.getEmails(1, 50, search || undefined)
       .then((r) => setEmails(r.data))
-      .catch(() => setEmails([]))
+      .catch((e) => { console.error("Failed to fetch emails:", e); setEmails([]); })
       .finally(() => setLoading(false));
   }, [search]);
 

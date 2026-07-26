@@ -16,10 +16,11 @@ interface AnalyticsOverview {
 export default function AnalyticsPage() {
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch(() => {});
-    api.getChartData(30).then((r) => setChartData(r.data)).catch(() => {});
+    api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch((e) => { console.error("Failed to fetch analytics overview:", e); setError("Failed to load analytics data"); });
+    api.getChartData(30).then((r) => setChartData(r.data)).catch((e) => console.error("Failed to fetch chart data:", e));
   }, []);
 
   const pieData = overview ? [
@@ -37,6 +38,12 @@ export default function AnalyticsPage() {
         <h1 className="text-2xl font-bold">Analytics</h1>
         <p className="text-zinc-400 text-sm mt-1">Monitor your email delivery performance</p>
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
