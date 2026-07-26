@@ -8,5 +8,6 @@ build/
 .env.test.local
 .env.production.local
 *.log
+*.tsbuildinfo
 .DS_Store
 .turbo/
