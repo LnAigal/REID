@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { api } from "../../../lib/api";
+import type { ChartDataPoint } from "@repo/shared";
 
 interface AnalyticsOverview {
   total: number;
@@ -14,7 +15,7 @@ interface AnalyticsOverview {
 
 export default function AnalyticsPage() {
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   useEffect(() => {
     api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch(() => {});

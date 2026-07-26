@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Shield, Trash2 } from "lucide-react";
+import { User, Shield } from "lucide-react";
 import { api } from "../../../lib/api";
 
 export default function SettingsPage() {
@@ -25,8 +25,9 @@ export default function SettingsPage() {
     try {
       await api.updateProfile({ name });
       setProfile((prev) => prev ? { ...prev, name } : prev);
-    } catch (e: any) {
-      alert(e.message || "Failed to update profile");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to update profile";
+      alert(message);
     } finally {
       setSaving(false);
     }
@@ -44,8 +45,9 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPassword("");
       alert("Password updated successfully");
-    } catch (e: any) {
-      alert(e.message || "Failed to change password");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to change password";
+      alert(message);
     } finally {
       setSaving(false);
     }

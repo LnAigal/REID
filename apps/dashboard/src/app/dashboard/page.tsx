@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Globe, Key, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Mail, Globe, Key, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../../lib/api";
+import type { ChartDataPoint, DomainData, ApiKeyData } from "@repo/shared";
 
 interface Stats {
   total: number;
@@ -24,10 +25,10 @@ interface RecentEmail {
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [recentEmails, setRecentEmails] = useState<RecentEmail[]>([]);
-  const [domains, setDomains] = useState<any[]>([]);
-  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [domains, setDomains] = useState<DomainData[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
 
   useEffect(() => {
     api.getEmailStats().then((r) => setStats(r.data)).catch(() => {});
