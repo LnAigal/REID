@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { sanitizeHtml, sanitizeOptionalHtml } from '../utils/sanitize';
 
 @Injectable()
 export class TemplateService {
@@ -9,6 +10,8 @@ export class TemplateService {
     return this.prisma.template.create({
       data: {
         ...data,
+        html: sanitizeHtml(data.html),
+        text: sanitizeOptionalHtml(data.text),
         variables: data.variables as any,
         userId,
       },
@@ -31,9 +34,16 @@ export class TemplateService {
   }
 
   async update(userId: string, templateId: string, data: Partial<{ name: string; subject: string; html: string; text: string }>) {
+    const sanitizedData: typeof data = { ...data };
+    if (sanitizedData.html) {
+      sanitizedData.html = sanitizeHtml(sanitizedData.html);
+    }
+    if (sanitizedData.text) {
+      sanitizedData.text = sanitizeOptionalHtml(sanitizedData.text) ?? undefined;
+    }
     const template = await this.prisma.template.updateMany({
       where: { id: templateId, userId },
-      data,
+      data: sanitizedData,
     });
     if (template.count === 0) throw new NotFoundException('Template not found');
     return this.prisma.template.findFirst({ where: { id: templateId, userId } });

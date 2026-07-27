@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { SendMailOptions } from '../mail/mail-provider.interface';
+import { sanitizeOptionalHtml } from '../utils/sanitize';
 
 @Injectable()
 export class EmailService {
@@ -30,7 +31,7 @@ export class EmailService {
         bcc: data.bcc || [],
         replyTo: data.replyTo,
         subject: data.subject,
-        html: data.html,
+        html: sanitizeOptionalHtml(data.html),
         text: data.text,
         headers: data.headers as any,
         status: 'QUEUED',
