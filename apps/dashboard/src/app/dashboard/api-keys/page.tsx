@@ -10,7 +10,7 @@ interface ApiKey {
   prefix: string;
   type: string;
   isActive: boolean;
-  lastUsed: string | null;
+  lastUsed?: string;
   createdAt: string;
 }
 

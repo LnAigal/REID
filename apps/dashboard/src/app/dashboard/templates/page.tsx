@@ -9,7 +9,7 @@ interface Template {
   name: string;
   subject: string;
   html: string;
-  variables: Record<string, string> | null;
+  variables?: Record<string, string>;
   createdAt: string;
 }
 

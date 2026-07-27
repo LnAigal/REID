@@ -6,7 +6,7 @@ import { api } from "../../../lib/api";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
-  const [profile, setProfile] = useState<{ name: string; email: string } | null>(null);
+  const [profile, setProfile] = useState<{ name?: string; email: string } | null>(null);
   const [name, setName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -16,7 +16,7 @@ export default function SettingsPage() {
   useEffect(() => {
     api.getProfile().then((r) => {
       setProfile(r.data);
-      setName(r.data.name);
+      setName(r.data.name ?? "");
     }).catch((e) => console.error("Failed to fetch profile:", e));
   }, []);
 

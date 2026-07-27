@@ -20,7 +20,7 @@ interface Email {
   subject: string;
   status: string;
   provider: string;
-  latency: number | null;
+  latency?: number;
   createdAt: string;
 }
 
