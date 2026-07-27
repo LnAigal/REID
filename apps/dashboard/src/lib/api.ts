@@ -5,12 +5,18 @@ if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL environment variable is required");
 }
 
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/csrf_token=([^;]+)/);
+  return match ? match[1] : null;
+}
+
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;
 }
 
 async function request<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { params, ...fetchOptions } = options;
+  const method = (fetchOptions.method || "GET").toUpperCase();
 
   let url = `${API_URL}${endpoint}`;
   if (params) {
@@ -22,13 +28,22 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
     if (qs) url += `?${qs}`;
   }
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(fetchOptions.headers as Record<string, string>),
+  };
+
+  if (method !== "GET" && method !== "HEAD") {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      headers["X-CSRF-Token"] = csrfToken;
+    }
+  }
+
   const res = await fetch(url, {
     ...fetchOptions,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...fetchOptions.headers,
-    },
+    headers,
   });
 
   if (!res.ok) {

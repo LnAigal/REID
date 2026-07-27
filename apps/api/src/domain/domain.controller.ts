@@ -2,6 +2,7 @@ import { Controller, Post, Get, Delete, Body, Param, UseGuards, Req } from '@nes
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DomainService } from './domain.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, Matches } from 'class-validator';
 import { RequestUser } from '../types/request-user';
@@ -18,7 +19,7 @@ export class DomainController {
   constructor(private domainService: DomainService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a domain' })
   async create(@Req() req: Request, @Body() dto: CreateDomainDto) {
@@ -48,7 +49,7 @@ export class DomainController {
   }
 
   @Post(':id/verify')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify domain' })
   async verify(@Req() req: Request, @Param('id') id: string) {
@@ -58,7 +59,7 @@ export class DomainController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete domain' })
   async remove(@Req() req: Request, @Param('id') id: string) {

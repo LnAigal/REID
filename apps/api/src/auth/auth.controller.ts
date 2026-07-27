@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body, Req, Res, UseGuards, Patch, Delete } from 
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { CsrfGuard, setCsrfCookie, signCsrfToken } from './csrf.guard';
 import { Request, Response } from 'express';
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
 import { RequestUser } from '../types/request-user';
@@ -66,6 +67,9 @@ export class AuthController {
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.signup(dto.email, dto.name, dto.password);
     this.authService.setAuthCookie(res, result.token);
+    const csrfToken = setCsrfCookie(res);
+    const secret = process.env.JWT_SECRET!;
+    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, secret));
     return { success: true, data: result };
   }
 
@@ -76,15 +80,23 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto.email, dto.password);
     this.authService.setAuthCookie(res, result.token);
+    const csrfToken = setCsrfCookie(res);
+    const secret = process.env.JWT_SECRET!;
+    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, secret));
     return { success: true, data: result };
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Sign out' })
   async logout(@Res({ passthrough: true }) res: Response) {
     this.authService.clearAuthCookie(res);
+    res.clearCookie('csrf_token', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
     return { success: true, message: 'Logged out successfully' };
   }
 
@@ -99,7 +111,7 @@ export class AuthController {
   }
 
   @Patch('profile')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update profile' })
   async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
@@ -109,7 +121,7 @@ export class AuthController {
   }
 
   @Patch('password')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password' })
   async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {

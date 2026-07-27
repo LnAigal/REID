@@ -2,6 +2,7 @@ import { Controller, Post, Get, Delete, Body, Param, UseGuards, Req } from '@nes
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiKeyService } from './api-key.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, IsEnum, MinLength, MaxLength } from 'class-validator';
 import { RequestUser } from '../types/request-user';
@@ -22,7 +23,7 @@ export class ApiKeyController {
   constructor(private apiKeyService: ApiKeyService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create an API key' })
   async create(@Req() req: Request, @Body() dto: CreateApiKeyDto) {
@@ -42,7 +43,7 @@ export class ApiKeyController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an API key' })
   async remove(@Req() req: Request, @Param('id') id: string) {
@@ -51,7 +52,7 @@ export class ApiKeyController {
   }
 
   @Post(':id/regenerate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Regenerate an API key' })
   async regenerate(@Req() req: Request, @Param('id') id: string) {

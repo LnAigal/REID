@@ -2,6 +2,7 @@ import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Req } fro
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TemplateService } from './template.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, MinLength, IsOptional } from 'class-validator';
 
@@ -28,7 +29,7 @@ export class TemplateController {
   constructor(private templateService: TemplateService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a template' })
   async create(@Req() req: Request, @Body() dto: CreateTemplateDto) {
@@ -58,7 +59,7 @@ export class TemplateController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update template' })
   async update(@Req() req: Request, @Param('id') id: string, @Body() dto: Partial<CreateTemplateDto>) {
@@ -68,7 +69,7 @@ export class TemplateController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete template' })
   async remove(@Req() req: Request, @Param('id') id: string) {

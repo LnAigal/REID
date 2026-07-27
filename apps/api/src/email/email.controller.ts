@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body, Param, Query, UseGuards, Req } from '@nest
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { EmailService } from './email.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject } from 'class-validator';
 import { RequestUser } from '../types/request-user';
@@ -50,7 +51,7 @@ export class EmailController {
   constructor(private emailService: EmailService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send an email' })
   async send(@Req() req: Request, @Body() dto: SendEmailDto) {
