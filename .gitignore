@@ -3,10 +3,8 @@ node_modules/
 dist/
 build/
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 *.log
 *.tsbuildinfo
 .DS_Store
