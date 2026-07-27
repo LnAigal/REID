@@ -11,8 +11,12 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
 
+  const corsOrigin = process.env.CORS_ORIGIN;
+  if (!corsOrigin) {
+    throw new Error('CORS_ORIGIN environment variable is required');
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: corsOrigin,
     credentials: true,
   });
 

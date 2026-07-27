@@ -1,6 +1,9 @@
 import type { EmailData, ApiKeyData, DomainData, UserData, TemplateData, ChartDataPoint } from "@repo/shared";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL environment variable is required");
+}
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;
