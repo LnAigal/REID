@@ -82,10 +82,10 @@ export class REID {
     };
   }
 
-  private async request<T = any>(
+  private async request<T = Record<string, unknown>>(
     method: string,
     path: string,
-    body?: any
+    body?: Record<string, unknown>
   ): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
@@ -99,7 +99,7 @@ export class REID {
     }
 
     const response = await fetch(url, config);
-    const data: any = await response.json();
+    const data: Record<string, unknown> = await response.json() as Record<string, unknown>;
 
     if (!response.ok) {
       throw new REIDError(data as APIError);
