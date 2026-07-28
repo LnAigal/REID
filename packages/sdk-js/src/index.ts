@@ -82,10 +82,11 @@ export class REID {
     };
   }
 
-  private async request<T = Record<string, unknown>>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async request<T = any>(
     method: string,
     path: string,
-    body?: Record<string, unknown>
+    body?: unknown
   ): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
@@ -99,7 +100,8 @@ export class REID {
     }
 
     const response = await fetch(url, config);
-    const data: Record<string, unknown> = await response.json() as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = await response.json();
 
     if (!response.ok) {
       throw new REIDError(data as APIError);
