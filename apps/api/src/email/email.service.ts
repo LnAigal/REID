@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { Prisma } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
-import { SendMailOptions, SendMailResult } from '../mail/mail-provider.interface';
+import { SendMailOptions } from '../mail/mail-provider.interface';
 import { sanitizeOptionalHtml } from '../utils/sanitize';
 
 @Injectable()
