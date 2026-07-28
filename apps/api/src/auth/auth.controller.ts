@@ -1,11 +1,10 @@
-import { Controller, Post, Get, Body, Req, Res, UseGuards, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CsrfGuard, setCsrfCookie, signCsrfToken } from './csrf.guard';
 import { Request, Response } from 'express';
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
-import { RequestUser } from '../types/request-user';
 
 class SignupDto {
   @IsEmail()

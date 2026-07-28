@@ -5,7 +5,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject } from 'class-validator';
-import { RequestUser } from '../types/request-user';
 
 class SendEmailDto {
   @IsEmail()

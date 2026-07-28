@@ -5,7 +5,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, Matches } from 'class-validator';
-import { RequestUser } from '../types/request-user';
 
 class CreateDomainDto {
   @IsString()

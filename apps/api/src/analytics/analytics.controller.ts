@@ -3,7 +3,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
-import { RequestUser } from '../types/request-user';
 
 @ApiTags('analytics')
 @Controller('analytics')
