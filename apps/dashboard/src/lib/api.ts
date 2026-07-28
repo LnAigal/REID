@@ -1,8 +1,11 @@
 import type { EmailData, ApiKeyData, DomainData, UserData, TemplateData, ChartDataPoint } from "@repo/shared";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL environment variable is required");
+function getApiUrl(): string {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_API_URL environment variable is required");
+  }
+  return url;
 }
 
 function getCsrfToken(): string | null {
@@ -18,7 +21,7 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
   const { params, ...fetchOptions } = options;
   const method = (fetchOptions.method || "GET").toUpperCase();
 
-  let url = `${API_URL}${endpoint}`;
+  let url = `${getApiUrl()}${endpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
