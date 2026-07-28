@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { sanitizeHtml, sanitizeOptionalHtml } from '../utils/sanitize';
 
@@ -12,7 +13,7 @@ export class TemplateService {
         ...data,
         html: sanitizeHtml(data.html),
         text: sanitizeOptionalHtml(data.text),
-        variables: data.variables as any,
+        variables: data.variables as unknown as Prisma.InputJsonValue,
         userId,
       },
     });
