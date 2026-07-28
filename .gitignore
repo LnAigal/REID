@@ -9,3 +9,6 @@ build/
 *.tsbuildinfo
 .DS_Store
 .turbo/
+*.pem
+*.key
+secrets/
