@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, ArrowRight, Code2, Key, Globe, Send } from "lucide-react";
+import { Mail, Code2, Key, Globe, Send } from "lucide-react";
 
 export default function DocsPage() {
   return (
