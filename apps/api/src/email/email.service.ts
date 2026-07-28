@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { Prisma } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
-import { SendMailOptions } from '../mail/mail-provider.interface';
+import { SendMailOptions, SendMailResult } from '../mail/mail-provider.interface';
 import { sanitizeOptionalHtml } from '../utils/sanitize';
 
 @Injectable()
@@ -33,7 +34,7 @@ export class EmailService {
         subject: data.subject,
         html: sanitizeOptionalHtml(data.html),
         text: data.text,
-        headers: data.headers as any,
+        headers: data.headers as Prisma.InputJsonValue,
         status: 'QUEUED',
         provider: 'BREVO',
         apiKeyId,
@@ -49,7 +50,7 @@ export class EmailService {
 
     const result = await this.mailService.send(data);
 
-    const updateData: any = {};
+    const updateData: Prisma.EmailUpdateInput = {};
     if (result.success) {
       updateData.status = 'SENT';
       updateData.providerId = result.messageId;
@@ -67,7 +68,7 @@ export class EmailService {
       this.prisma.emailEvent.create({
         data: {
           type: result.success ? 'sent' : 'failed',
-          data: result as any,
+          data: result as unknown as Prisma.InputJsonValue,
           emailId: email.id,
         },
       }),
@@ -89,7 +90,7 @@ export class EmailService {
 
   async getEmails(userId: string, page = 1, limit = 20, search?: string) {
     const skip = (page - 1) * limit;
-    const where: any = { userId };
+    const where: Prisma.EmailWhereInput = { userId };
 
     if (search) {
       where.OR = [
