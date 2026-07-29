@@ -50,11 +50,11 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `Request failed: ${res.status}`);
+    const body: Record<string, unknown> = await res.json().catch(() => ({}));
+    throw new Error(typeof body.message === "string" ? body.message : `Request failed: ${res.status}`);
   }
 
-  return res.json();
+  return res.json() as Promise<T>;
 }
 
 export const api = {
