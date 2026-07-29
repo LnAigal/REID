@@ -32,11 +32,11 @@ export default function DashboardOverview() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getEmailStats().then((r) => setStats(r.data)).catch((e) => { console.error("Failed to fetch email stats:", e); setError("Failed to load dashboard data"); });
-    api.getChartData(7).then((r) => setChartData(r.data)).catch((e) => console.error("Failed to fetch chart data:", e));
-    api.getEmails(1, 5).then((r) => setRecentEmails(r.data)).catch((e) => console.error("Failed to fetch emails:", e));
-    api.getDomains().then((r) => setDomains(r.data)).catch((e) => console.error("Failed to fetch domains:", e));
-    api.getApiKeys().then((r) => setApiKeys(r.data)).catch((e) => console.error("Failed to fetch API keys:", e));
+    api.getEmailStats().then((r) => setStats(r.data)).catch(() => setError("Failed to load dashboard data"));
+    api.getChartData(7).then((r) => setChartData(r.data)).catch(() => {});
+    api.getEmails(1, 5).then((r) => setRecentEmails(r.data)).catch(() => {});
+    api.getDomains().then((r) => setDomains(r.data)).catch(() => {});
+    api.getApiKeys().then((r) => setApiKeys(r.data)).catch(() => {});
   }, []);
 
   const overviewStats = [

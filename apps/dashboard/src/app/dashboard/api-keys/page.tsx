@@ -24,7 +24,7 @@ export default function ApiKeysPage() {
   const fetchKeys = () => {
     api.getApiKeys()
       .then((r) => setApiKeys(r.data))
-      .catch((e) => { console.error("Failed to fetch API keys:", e); setApiKeys([]); })
+      .catch(() => setApiKeys([]))
       .finally(() => setLoading(false));
   };
 

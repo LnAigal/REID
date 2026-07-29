@@ -17,7 +17,7 @@ export default function SettingsPage() {
     api.getProfile().then((r) => {
       setProfile(r.data);
       setName(r.data.name ?? "");
-    }).catch((e) => console.error("Failed to fetch profile:", e));
+    }).catch(() => {});
   }, []);
 
   const handleSaveProfile = async () => {

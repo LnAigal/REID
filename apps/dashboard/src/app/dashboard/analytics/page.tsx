@@ -19,8 +19,8 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch((e) => { console.error("Failed to fetch analytics overview:", e); setError("Failed to load analytics data"); });
-    api.getChartData(30).then((r) => setChartData(r.data)).catch((e) => console.error("Failed to fetch chart data:", e));
+    api.getAnalyticsOverview().then((r) => setOverview(r.data)).catch(() => setError("Failed to load analytics data"));
+    api.getChartData(30).then((r) => setChartData(r.data)).catch(() => {});
   }, []);
 
   const pieData = overview ? [

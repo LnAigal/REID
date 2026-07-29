@@ -22,7 +22,7 @@ export default function TemplatesPage() {
   const fetchTemplates = () => {
     api.getTemplates()
       .then((r) => setTemplates(r.data))
-      .catch((e) => { console.error("Failed to fetch templates:", e); setTemplates([]); })
+      .catch(() => setTemplates([]))
       .finally(() => setLoading(false));
   };
 
