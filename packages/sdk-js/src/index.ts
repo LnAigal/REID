@@ -82,8 +82,7 @@ export class REID {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async request<T = any>(
+  private async request<T = unknown>(
     method: string,
     path: string,
     body?: unknown
@@ -100,14 +99,13 @@ export class REID {
     }
 
     const response = await fetch(url, config);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = await response.json();
+    const data: Record<string, unknown> = await response.json();
 
     if (!response.ok) {
-      throw new REIDError(data as APIError);
+      throw new REIDError(data as unknown as APIError);
     }
 
-    return data.data || data;
+    return (data.data ?? data) as T;
   }
 }
 
