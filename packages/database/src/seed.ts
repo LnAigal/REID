@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ async function main() {
     create: {
       name: 'reid.dev',
       status: 'VERIFIED',
-      verificationToken: 'seed-verification-token',
+      verificationToken: randomUUID(),
       verifiedAt: new Date(),
       userId: user.id,
       records: {
