@@ -12,3 +12,4 @@ build/
 *.pem
 *.key
 secrets/
+TODO.md

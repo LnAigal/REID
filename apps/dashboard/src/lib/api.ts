@@ -64,6 +64,10 @@ export const api = {
     request<{ success: boolean; data: UserData }>("/auth/profile", { method: "PATCH", body: JSON.stringify(data) }),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     request<{ success: boolean; data: { message: string } }>("/auth/password", { method: "PATCH", body: JSON.stringify(data) }),
+  sendVerification: () =>
+    request<{ success: boolean; data: { message: string } }>("/auth/send-verification", { method: "POST" }),
+  verifyEmail: (token: string) =>
+    request<{ success: boolean; data: { message: string } }>("/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
 
   // Emails
   getEmails: (page = 1, limit = 20, search?: string) =>

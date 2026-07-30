@@ -26,6 +26,11 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
+    const authHeader = request.headers.authorization;
+    if (authHeader?.startsWith('Bearer reid_')) {
+      return true;
+    }
+
     const cookieToken = request.cookies?.[CSRF_TOKEN_COOKIE];
     const headerToken = request.headers[CSRF_TOKEN_HEADER] as string | undefined;
 
@@ -33,7 +38,7 @@ export class CsrfGuard implements CanActivate {
       throw new ForbiddenException('CSRF token missing');
     }
 
-    const secret = process.env.JWT_SECRET;
+    const secret = process.env.CSRF_SECRET || process.env.JWT_SECRET;
     if (!secret) {
       throw new ForbiddenException('CSRF configuration error');
     }

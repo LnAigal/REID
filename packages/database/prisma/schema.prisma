@@ -48,8 +48,11 @@ model User {
   name          String?
   password      String
   role          UserRole  @default(USER)
-  emailVerified Boolean   @default(false)
-  avatarUrl     String?
+  emailVerified       Boolean   @default(false)
+  verificationToken   String?   @unique
+  verificationTokenExpires DateTime?
+  tokenVersion        Int       @default(0)
+  avatarUrl           String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

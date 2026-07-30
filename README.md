@@ -58,11 +58,6 @@ npm run db:seed
 npm run dev
 ```
 
-### Default Credentials
-
-- **Email:** admin@reid.dev
-- **Password:** Admin123!
-
 ## API Documentation
 
 Once running, visit `http://localhost:3001/docs` for the Swagger API documentation.

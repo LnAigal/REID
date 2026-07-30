@@ -15,6 +15,15 @@ export class EmailService {
   ) {}
 
   async send(userId: string, data: SendMailOptions, apiKeyId?: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { emailVerified: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.emailVerified) {
+      throw new BadRequestException('Email not verified. Please verify your email before sending.');
+    }
+
     const domain = this.extractDomain(data.from);
     const domainRecord = await this.prisma.domain.findFirst({
       where: { name: domain, userId, status: 'VERIFIED' },

@@ -4,7 +4,7 @@ import { EmailService } from './email.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
-import { IsEmail, IsArray, IsOptional, IsString, IsObject } from 'class-validator';
+import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength } from 'class-validator';
 
 class SendEmailDto {
   @IsEmail()
@@ -33,10 +33,12 @@ class SendEmailDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(50000)
   html?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(50000)
   text?: string;
 
   @IsOptional()

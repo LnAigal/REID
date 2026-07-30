@@ -36,7 +36,7 @@ describe('AuthService', () => {
   describe('signup', () => {
     it('should create a new user and return token', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
-      prisma.user.create.mockResolvedValue({ id: '1', email: 'test@test.com', name: 'Test', role: 'USER', createdAt: new Date() });
+      prisma.user.create.mockResolvedValue({ id: '1', email: 'test@test.com', name: 'Test', role: 'USER', tokenVersion: 0, createdAt: new Date() });
 
       const result = await service.signup('test@test.com', 'Test', 'Password1');
 
@@ -55,7 +55,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should return token for valid credentials', async () => {
       const hashedPassword = await bcrypt.hash('Password1', 12);
-      prisma.user.findUnique.mockResolvedValue({ id: '1', email: 'test@test.com', password: hashedPassword, role: 'USER', name: 'Test', createdAt: new Date() });
+      prisma.user.findUnique.mockResolvedValue({ id: '1', email: 'test@test.com', password: hashedPassword, role: 'USER', name: 'Test', tokenVersion: 0, createdAt: new Date() });
 
       const result = await service.login('test@test.com', 'Password1');
 
@@ -80,7 +80,7 @@ describe('AuthService', () => {
   describe('changePassword', () => {
     it('should update password for valid current password', async () => {
       const hashedPassword = await bcrypt.hash('OldPass1', 12);
-      prisma.user.findUnique.mockResolvedValue({ id: '1', password: hashedPassword });
+      prisma.user.findUnique.mockResolvedValue({ id: '1', password: hashedPassword, tokenVersion: 0 });
       prisma.user.update.mockResolvedValue({});
 
       const result = await service.changePassword('1', 'OldPass1', 'NewPass1');

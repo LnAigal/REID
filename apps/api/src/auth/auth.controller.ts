@@ -3,8 +3,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CsrfGuard, setCsrfCookie, signCsrfToken } from './csrf.guard';
+import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
+import { IsEmail, IsString, IsUrl, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
 
 class SignupDto {
   @IsEmail()
@@ -39,6 +40,7 @@ class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
+  @IsUrl({ require_tld: false })
   avatarUrl?: string;
 }
 
@@ -60,6 +62,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Create a new account' })
   @ApiResponse({ status: 201, description: 'Account created successfully' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
@@ -67,12 +70,13 @@ export class AuthController {
     const result = await this.authService.signup(dto.email, dto.name, dto.password);
     this.authService.setAuthCookie(res, result.token);
     const csrfToken = setCsrfCookie(res);
-    const secret = process.env.JWT_SECRET!;
-    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, secret));
+    const csrfSecret = process.env.CSRF_SECRET || process.env.JWT_SECRET!;
+    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, csrfSecret));
     return { success: true, data: result };
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({ summary: 'Sign in to your account' })
   @ApiResponse({ status: 200, description: 'Signed in successfully' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
@@ -80,8 +84,8 @@ export class AuthController {
     const result = await this.authService.login(dto.email, dto.password);
     this.authService.setAuthCookie(res, result.token);
     const csrfToken = setCsrfCookie(res);
-    const secret = process.env.JWT_SECRET!;
-    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, secret));
+    const csrfSecret = process.env.CSRF_SECRET || process.env.JWT_SECRET!;
+    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, csrfSecret));
     return { success: true, data: result };
   }
 
@@ -119,7 +123,23 @@ export class AuthController {
     return { success: true, data: updated };
   }
 
+  @Post('send-verification')
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send email verification link' })
+  async sendVerification(@Req() req: Request) {
+    const user = req.user!;
+    return this.authService.sendVerificationEmail(user.id);
+  }
+
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify email with token' })
+  async verifyEmail(@Body('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
   @Patch('password')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password' })
