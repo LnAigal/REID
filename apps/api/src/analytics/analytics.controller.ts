@@ -3,6 +3,13 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
+import { Min, Max } from 'class-validator';
+
+class ChartQueryDto {
+  @Min(1)
+  @Max(365)
+  days: number = 30;
+}
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -24,9 +31,9 @@ export class AnalyticsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get chart data' })
   @ApiQuery({ name: 'days', required: false })
-  async getChartData(@Req() req: Request, @Query('days') days?: number) {
+  async getChartData(@Req() req: Request, @Query() query: ChartQueryDto) {
     const user = req.user!;
-    const result = await this.analyticsService.getChartData(user.id, days || 30);
+    const result = await this.analyticsService.getChartData(user.id, query.days);
     return { success: true, data: result };
   }
 }
