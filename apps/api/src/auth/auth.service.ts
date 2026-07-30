@@ -189,6 +189,68 @@ export class AuthService {
     return { message: 'Email verified successfully' };
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return { message: 'If that email exists, a reset link has been sent' };
+    }
+
+    const resetToken = randomUUID();
+    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { resetPasswordToken: resetToken, resetPasswordExpires: resetTokenExpires },
+    });
+
+    const appUrl = this.config.get('APP_URL', 'http://localhost:3000');
+    const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
+    const appName = this.config.get('APP_NAME', 'REID');
+
+    await this.mailService.send({
+      from: this.config.get('VERIFICATION_FROM_EMAIL', 'noreply@reid.dev'),
+      to: [user.email],
+      subject: `Reset your ${appName} password`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Password Reset</h2>
+          <p>Click the button below to reset your password:</p>
+          <a href="${resetLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a>
+          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${resetLink}">${resetLink}</a></p>
+          <p style="color: #999; font-size: 12px;">This link expires in 1 hour.</p>
+          <p style="color: #999; font-size: 12px;">If you didn't request this, you can ignore this email.</p>
+        </div>
+      `,
+      text: `Reset your ${appName} password by visiting: ${resetLink}. This link expires in 1 hour.`,
+    });
+
+    return { message: 'If that email exists, a reset link has been sent' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: { gte: new Date() },
+      },
+    });
+
+    if (!user) throw new BadRequestException('Invalid or expired reset token');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+        tokenVersion: { increment: 1 },
+      },
+    });
+
+    return { message: 'Password reset successfully' };
+  }
+
   async validateToken(payload: JwtPayload) {
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) throw new UnauthorizedException('User not found');

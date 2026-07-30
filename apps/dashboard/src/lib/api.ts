@@ -68,6 +68,10 @@ export const api = {
     request<{ success: boolean; data: { message: string } }>("/auth/send-verification", { method: "POST" }),
   verifyEmail: (token: string) =>
     request<{ success: boolean; data: { message: string } }>("/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
+  forgotPassword: (email: string) =>
+    request<{ success: boolean; data: { message: string } }>("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
+  resetPassword: (token: string, password: string) =>
+    request<{ success: boolean; data: { message: string } }>("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, password }) }),
 
   // Emails
   getEmails: (page = 1, limit = 20, search?: string) =>
