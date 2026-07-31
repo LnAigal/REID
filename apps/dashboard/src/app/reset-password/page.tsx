@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Mail, Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const token = searchParams.get("token");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
