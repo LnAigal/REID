@@ -23,6 +23,26 @@ class CreateTemplateDto {
   text?: string;
 }
 
+class UpdateTemplateDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  subject?: string;
+
+  @IsOptional()
+  @IsString()
+  html?: string;
+
+  @IsOptional()
+  @IsString()
+  text?: string;
+}
+
 @ApiTags('templates')
 @Controller('templates')
 export class TemplateController {
@@ -62,7 +82,7 @@ export class TemplateController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update template' })
-  async update(@Req() req: Request, @Param('id') id: string, @Body() dto: Partial<CreateTemplateDto>) {
+  async update(@Req() req: Request, @Param('id') id: string, @Body() dto: UpdateTemplateDto) {
     const user = req.user!;
     const result = await this.templateService.update(user.id, id, dto);
     return { success: true, data: result };

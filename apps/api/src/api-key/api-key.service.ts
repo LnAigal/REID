@@ -11,7 +11,7 @@ export class ApiKeyService {
     const rawKey = uuidv4().replace(/-/g, '');
     const prefix = type === 'LIVE' ? 'reid_live' : 'reid_test';
     const key = `${prefix}_${rawKey}`;
-    const keyPrefix = `${key.substring(0, 12)}...`;
+    const keyPrefix = `${prefix}_${rawKey.substring(0, 12)}`;
 
     const apiKey = await this.prisma.apiKey.create({
       data: {
@@ -71,7 +71,7 @@ export class ApiKeyService {
     const rawKey = uuidv4().replace(/-/g, '');
     const prefix = apiKey.type === 'LIVE' ? 'reid_live' : 'reid_test';
     const key = `${prefix}_${rawKey}`;
-    const keyPrefix = `${key.substring(0, 12)}...`;
+    const keyPrefix = `${prefix}_${rawKey.substring(0, 12)}`;
 
     const updated = await this.prisma.apiKey.update({
       where: { id: keyId },
@@ -93,21 +93,21 @@ export class ApiKeyService {
 
   async validateKey(rawKey: string): Promise<{ userId: string; keyId: string } | null> {
     const prefix = rawKey.startsWith('reid_live_') ? 'reid_live' : 'reid_test';
-    const keyPrefix = `${rawKey.substring(0, 12)}...`;
+    const keyPrefix = `${prefix}_${rawKey.substring(0, 12)}`;
     const hashedRawKey = await this.hashKey(rawKey);
 
-    const apiKey = await this.prisma.apiKey.findFirst({
+    const apiKeys = await this.prisma.apiKey.findMany({
       where: {
         prefix: keyPrefix,
         type: prefix === 'reid_live' ? 'LIVE' : 'TEST',
         isActive: true,
+        OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }],
       },
       include: { user: { select: { id: true } } },
     });
 
+    const apiKey = apiKeys.find((candidate) => candidate.key === hashedRawKey);
     if (!apiKey) return null;
-
-    if (apiKey.key !== hashedRawKey) return null;
 
     await this.prisma.apiKey.update({
       where: { id: apiKey.id },

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Mail, Loader2, CheckCircle2, XCircle } from "lucide-react";
 

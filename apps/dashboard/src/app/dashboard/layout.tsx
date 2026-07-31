@@ -15,7 +15,7 @@ import {
   Menu,
 } from "lucide-react";
 import { useState } from "react";
-import { api } from "../lib/api";
+import { api } from "../../lib/api";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },

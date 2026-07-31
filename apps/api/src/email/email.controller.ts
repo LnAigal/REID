@@ -4,13 +4,15 @@ import { EmailService } from './email.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
-import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, IsInt, Min, Max } from 'class-validator';
 
 class SendEmailDto {
   @IsEmail()
   from: string;
 
   @IsArray()
+  @ArrayMinSize(1)
   @IsEmail({}, { each: true })
   to: string[];
 
@@ -46,6 +48,25 @@ class SendEmailDto {
   headers?: Record<string, string>;
 }
 
+class ListEmailsQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 20;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+}
+
 @ApiTags('emails')
 @Controller('emails')
 export class EmailController {
@@ -57,7 +78,7 @@ export class EmailController {
   @ApiOperation({ summary: 'Send an email' })
   async send(@Req() req: Request, @Body() dto: SendEmailDto) {
     const user = req.user!;
-    const result = await this.emailService.send(user.id, dto);
+    const result = await this.emailService.send(user.id, dto, req.apiKeyId);
     return { success: true, data: result };
   }
 
@@ -70,12 +91,10 @@ export class EmailController {
   @ApiQuery({ name: 'search', required: false })
   async list(
     @Req() req: Request,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('search') search?: string,
+    @Query() query: ListEmailsQueryDto,
   ) {
     const user = req.user!;
-    const result = await this.emailService.getEmails(user.id, page || 1, limit || 20, search);
+    const result = await this.emailService.getEmails(user.id, query.page, query.limit, query.search);
     return { success: true, ...result };
   }
 

@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { Prisma } from '@repo/database';
+import { Prisma, EmailProvider } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { SendMailOptions } from '../mail/mail-provider.interface';
 import { sanitizeOptionalHtml } from '../utils/sanitize';
+
+const PROVIDER_ENUM: Record<string, EmailProvider> = {
+  brevo: 'BREVO',
+  custom_smtp: 'CUSTOM_SMTP',
+};
 
 @Injectable()
 export class EmailService {
@@ -33,6 +38,8 @@ export class EmailService {
       throw new BadRequestException(`Domain "${domain}" is not verified`);
     }
 
+    const sanitizedHtml = sanitizeOptionalHtml(data.html);
+
     const email = await this.prisma.email.create({
       data: {
         from: data.from,
@@ -41,11 +48,11 @@ export class EmailService {
         bcc: data.bcc || [],
         replyTo: data.replyTo,
         subject: data.subject,
-        html: sanitizeOptionalHtml(data.html),
+        html: sanitizedHtml,
         text: data.text,
         headers: data.headers as Prisma.InputJsonValue,
         status: 'QUEUED',
-        provider: 'BREVO',
+        provider: PROVIDER_ENUM[this.mailService.getDefaultProvider()] || 'BREVO',
         apiKeyId,
         domainId: domainRecord.id,
         userId,
@@ -57,7 +64,18 @@ export class EmailService {
       data: { status: 'PROCESSING' },
     });
 
-    const result = await this.mailService.send(data);
+    let result: { success: boolean; messageId?: string; provider: string; error?: string };
+    try {
+      result = await this.mailService.send({ ...data, html: sanitizedHtml ?? undefined });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Mail provider failed';
+      this.logger.error(`Email send threw for ${email.id}: ${errorMessage}`);
+      await this.prisma.email.update({
+        where: { id: email.id },
+        data: { status: 'FAILED', errorMessage },
+      });
+      throw new BadRequestException('Failed to send email');
+    }
 
     const updateData: Prisma.EmailUpdateInput = {};
     if (result.success) {
@@ -66,7 +84,7 @@ export class EmailService {
       updateData.sentAt = new Date();
     } else {
       updateData.status = 'FAILED';
-      updateData.errorMessage = result.error;
+      updateData.errorMessage = result.error ?? null;
     }
 
     const [updatedEmail] = await this.prisma.$transaction([
@@ -84,7 +102,8 @@ export class EmailService {
     ]);
 
     if (!result.success) {
-      throw new BadRequestException(result.error || 'Failed to send email');
+      this.logger.error(`Email send failed for ${email.id}: ${result.error}`);
+      throw new BadRequestException('Failed to send email');
     }
 
     return {

@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, Req, Res, UseGuards, Patch } from '@nestjs
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { CsrfGuard, setCsrfCookie, signCsrfToken } from './csrf.guard';
+import { CsrfGuard, setCsrfCookie } from './csrf.guard';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { IsEmail, IsString, IsUrl, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
@@ -61,6 +61,12 @@ class ForgotPasswordDto {
   email: string;
 }
 
+class VerifyEmailDto {
+  @IsString()
+  @MinLength(1)
+  token: string;
+}
+
 class ResetPasswordDto {
   @IsString()
   token: string;
@@ -86,9 +92,7 @@ export class AuthController {
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.signup(dto.email, dto.name, dto.password);
     this.authService.setAuthCookie(res, result.token);
-    const csrfToken = setCsrfCookie(res);
-    const csrfSecret = process.env.CSRF_SECRET || process.env.JWT_SECRET!;
-    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, csrfSecret));
+    setCsrfCookie(res);
     return { success: true, data: result };
   }
 
@@ -100,9 +104,7 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto.email, dto.password);
     this.authService.setAuthCookie(res, result.token);
-    const csrfToken = setCsrfCookie(res);
-    const csrfSecret = process.env.CSRF_SECRET || process.env.JWT_SECRET!;
-    res.setHeader('X-CSRF-Token', signCsrfToken(csrfToken, csrfSecret));
+    setCsrfCookie(res);
     return { success: true, data: result };
   }
 
@@ -151,8 +153,8 @@ export class AuthController {
 
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify email with token' })
-  async verifyEmail(@Body('token') token: string) {
-    return this.authService.verifyEmail(token);
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
   }
 
   @Post('forgot-password')
@@ -174,8 +176,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password' })
-  async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
+  async changePassword(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: ChangePasswordDto,
+  ) {
     const user = req.user!;
-    return this.authService.changePassword(user.id, dto.currentPassword, dto.newPassword);
+    const result = await this.authService.changePassword(user.id, dto.currentPassword, dto.newPassword);
+    this.authService.setAuthCookie(res, result.token);
+    return { success: true, data: { message: result.message } };
   }
 }

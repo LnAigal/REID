@@ -47,6 +47,11 @@ export class AnalyticsService {
     const bounceRate = totalEmails > 0 ? (bouncedEmails / totalEmails) * 100 : 0;
 
     return {
+      total: totalEmails,
+      sent: sentEmails,
+      delivered: deliveredEmails,
+      failed: failedEmails,
+      bounced: bouncedEmails,
       emailsSent: totalEmails,
       successRate: Math.round(successRate * 100) / 100,
       failureRate: Math.round(failureRate * 100) / 100,

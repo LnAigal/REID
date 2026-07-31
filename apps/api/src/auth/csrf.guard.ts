@@ -10,12 +10,6 @@ export function generateCsrfToken(): string {
   return crypto.randomBytes(CSRF_SECRET_LENGTH).toString('hex');
 }
 
-export function signCsrfToken(token: string, secret: string): string {
-  const hmac = crypto.createHmac('sha256', secret);
-  hmac.update(token);
-  return hmac.digest('hex');
-}
-
 @Injectable()
 export class CsrfGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
@@ -38,14 +32,12 @@ export class CsrfGuard implements CanActivate {
       throw new ForbiddenException('CSRF token missing');
     }
 
-    const secret = process.env.CSRF_SECRET || process.env.JWT_SECRET;
-    if (!secret) {
-      throw new ForbiddenException('CSRF configuration error');
-    }
-
-    const expectedSignature = signCsrfToken(cookieToken, secret);
-
-    if (!crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(expectedSignature))) {
+    const headerBuffer = Buffer.from(headerToken);
+    const cookieBuffer = Buffer.from(cookieToken);
+    if (
+      headerBuffer.length !== cookieBuffer.length ||
+      !crypto.timingSafeEqual(headerBuffer, cookieBuffer)
+    ) {
       throw new ForbiddenException('CSRF token invalid');
     }
 

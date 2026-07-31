@@ -1,6 +1,6 @@
 export interface RequestUser {
   id: string;
   email: string;
-  name: string;
+  name: string | null;
   role: string;
 }

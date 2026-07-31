@@ -123,12 +123,20 @@ export class AuthService {
     if (!isValid) throw new UnauthorizedException('Current password is incorrect');
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
-    await this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: userId },
       data: { password: hashedPassword, tokenVersion: { increment: 1 } },
+      select: { id: true, email: true, role: true, tokenVersion: true },
     });
 
-    return { message: 'Password updated successfully' };
+    const token = this.generateToken({
+      sub: updated.id,
+      email: updated.email,
+      role: updated.role,
+      tokenVersion: updated.tokenVersion,
+    });
+
+    return { message: 'Password updated successfully', token };
   }
 
   async sendVerificationEmail(userId: string) {
@@ -148,7 +156,7 @@ export class AuthService {
     const verifyLink = `${appUrl}/verify-email?token=${verificationToken}`;
     const appName = this.config.get('APP_NAME', 'REID');
 
-    await this.mailService.send({
+    const result = await this.mailService.send({
       from: this.config.get('VERIFICATION_FROM_EMAIL', 'noreply@reid.dev'),
       to: [user.email],
       subject: `Verify your ${appName} email address`,
@@ -164,10 +172,17 @@ export class AuthService {
       text: `Welcome to ${appName}! Verify your email by visiting: ${verifyLink}`,
     });
 
+    if (!result.success) {
+      this.logger.error(`Verification email send failed for ${user.id}: ${result.error}`);
+      throw new BadRequestException('Failed to send verification email. Please try again.');
+    }
+
     return { message: 'Verification email sent' };
   }
 
   async verifyEmail(token: string) {
+    if (!token) throw new BadRequestException('Verification token is required');
+
     const user = await this.prisma.user.findFirst({
       where: {
         verificationToken: token,
@@ -207,7 +222,7 @@ export class AuthService {
     const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
     const appName = this.config.get('APP_NAME', 'REID');
 
-    await this.mailService.send({
+    const result = await this.mailService.send({
       from: this.config.get('VERIFICATION_FROM_EMAIL', 'noreply@reid.dev'),
       to: [user.email],
       subject: `Reset your ${appName} password`,
@@ -223,6 +238,10 @@ export class AuthService {
       `,
       text: `Reset your ${appName} password by visiting: ${resetLink}. This link expires in 1 hour.`,
     });
+
+    if (!result.success) {
+      this.logger.error(`Password reset email send failed for ${user.id}: ${result.error}`);
+    }
 
     return { message: 'If that email exists, a reset link has been sent' };
   }
