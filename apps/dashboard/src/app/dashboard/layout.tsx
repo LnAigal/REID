@@ -15,6 +15,7 @@ import {
   Menu,
 } from "lucide-react";
 import { useState } from "react";
+import { api } from "../lib/api";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -78,10 +79,7 @@ export default function DashboardLayout({
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
           <button
             onClick={async () => {
-              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-                method: "POST",
-                credentials: "include",
-              });
+              await api.logout();
               window.location.href = "/login";
             }}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all w-full"

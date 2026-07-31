@@ -64,6 +64,8 @@ export const api = {
     request<{ success: boolean; data: UserData }>("/auth/profile", { method: "PATCH", body: JSON.stringify(data) }),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     request<{ success: boolean; data: { message: string } }>("/auth/password", { method: "PATCH", body: JSON.stringify(data) }),
+  logout: () =>
+    request<{ success: boolean; message: string }>("/auth/logout", { method: "POST" }),
   sendVerification: () =>
     request<{ success: boolean; data: { message: string } }>("/auth/send-verification", { method: "POST" }),
   verifyEmail: (token: string) =>
