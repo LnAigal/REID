@@ -14,6 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY . .
 RUN npm run db:generate --workspace=packages/database
+RUN npm run build --workspace=packages/database
 RUN npm run build --workspace=apps/api
 
 FROM base AS runner
@@ -22,6 +23,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nestjs
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/packages/database/prisma ./prisma
 USER nestjs
 EXPOSE 3001
