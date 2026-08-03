@@ -99,7 +99,7 @@ export class REID {
     }
 
     const response = await fetch(url, config);
-    const data: Record<string, unknown> = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
       throw new REIDError(data as unknown as APIError);
