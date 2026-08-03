@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from '../mail/mail.service';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
@@ -10,6 +11,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let prisma: { user: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock } };
   let jwt: { sign: jest.Mock };
+  let mail: { send: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -20,6 +22,7 @@ describe('AuthService', () => {
       },
     };
     jwt = { sign: jest.fn().mockReturnValue('mock-token') };
+    mail = { send: jest.fn().mockResolvedValue({ success: true }) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -27,6 +30,7 @@ describe('AuthService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: JwtService, useValue: jwt },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('7d') } },
+        { provide: MailService, useValue: mail },
       ],
     }).compile();
 
