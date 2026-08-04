@@ -199,6 +199,10 @@ export class EmailService {
   }
 
   private extractDomain(email: string): string {
-    return email.split('@')[1];
+    const atIndex = email.indexOf('@');
+    if (atIndex <= 0 || atIndex === email.length - 1) {
+      throw new BadRequestException('Invalid email address: missing domain');
+    }
+    return email.substring(atIndex + 1);
   }
 }
