@@ -6,8 +6,22 @@ const CSRF_TOKEN_COOKIE = 'csrf_token';
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
 const CSRF_SECRET_LENGTH = 32;
 
-export function generateCsrfToken(): string {
-  return crypto.randomBytes(CSRF_SECRET_LENGTH).toString('hex');
+function getCsrfSecret(): Buffer {
+  const secret = process.env.CSRF_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error('CSRF_SECRET must be set and at least 32 characters');
+  }
+  return Buffer.from(secret);
+}
+
+function hmacSign(token: string, secret: Buffer): string {
+  return crypto.createHmac('sha256', secret).update(token).digest('hex');
+}
+
+export function generateCsrfToken(): { raw: string; signature: string } {
+  const raw = crypto.randomBytes(CSRF_SECRET_LENGTH).toString('hex');
+  const signature = hmacSign(raw, getCsrfSecret());
+  return { raw, signature };
 }
 
 @Injectable()
@@ -25,18 +39,22 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
-    const cookieToken = request.cookies?.[CSRF_TOKEN_COOKIE];
+    const cookieSignature = request.cookies?.[CSRF_TOKEN_COOKIE];
     const headerToken = request.headers[CSRF_TOKEN_HEADER] as string | undefined;
 
-    if (!cookieToken || !headerToken) {
+    if (!cookieSignature || !headerToken) {
       throw new ForbiddenException('CSRF token missing');
     }
 
-    const headerBuffer = Buffer.from(headerToken);
-    const cookieBuffer = Buffer.from(cookieToken);
+    const secret = getCsrfSecret();
+    const expectedSignature = hmacSign(headerToken, secret);
+
+    const cookieBuffer = Buffer.from(cookieSignature, 'hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+
     if (
-      headerBuffer.length !== cookieBuffer.length ||
-      !crypto.timingSafeEqual(headerBuffer, cookieBuffer)
+      cookieBuffer.length !== expectedBuffer.length ||
+      !crypto.timingSafeEqual(cookieBuffer, expectedBuffer)
     ) {
       throw new ForbiddenException('CSRF token invalid');
     }
@@ -45,13 +63,13 @@ export class CsrfGuard implements CanActivate {
   }
 }
 
-export function setCsrfCookie(res: Response) {
-  const token = generateCsrfToken();
-  res.cookie(CSRF_TOKEN_COOKIE, token, {
+export function setCsrfCookie(res: Response): string {
+  const { raw, signature } = generateCsrfToken();
+  res.cookie(CSRF_TOKEN_COOKIE, signature, {
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-  return token;
+  return raw;
 }

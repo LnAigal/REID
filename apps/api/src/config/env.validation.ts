@@ -3,7 +3,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   DATABASE_URL: z.string().url().or(z.string().min(1)),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for HMAC-SHA256 security'),
-  CSRF_SECRET: z.string().min(32, 'CSRF_SECRET must be at least 32 characters for HMAC-SHA256 security').optional(),
+  CSRF_SECRET: z.string().min(32, 'CSRF_SECRET must be at least 32 characters for HMAC-SHA256 security'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().url().optional(),
   API_PREFIX: z.string().optional(),
