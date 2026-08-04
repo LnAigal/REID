@@ -40,7 +40,7 @@ class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: true, protocols: ['https'] })
   avatarUrl?: string;
 }
 
