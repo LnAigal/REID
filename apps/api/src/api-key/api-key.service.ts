@@ -96,9 +96,10 @@ export class ApiKeyService {
     const keyPrefix = `${prefix}_${rawKey.substring(0, 12)}`;
     const hashedRawKey = await this.hashKey(rawKey);
 
-    const apiKeys = await this.prisma.apiKey.findMany({
+    const apiKey = await this.prisma.apiKey.findFirst({
       where: {
         prefix: keyPrefix,
+        key: hashedRawKey,
         type: prefix === 'reid_live' ? 'LIVE' : 'TEST',
         isActive: true,
         OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }],
@@ -106,7 +107,6 @@ export class ApiKeyService {
       include: { user: { select: { id: true } } },
     });
 
-    const apiKey = apiKeys.find((candidate) => candidate.key === hashedRawKey);
     if (!apiKey) return null;
 
     await this.prisma.apiKey.update({
