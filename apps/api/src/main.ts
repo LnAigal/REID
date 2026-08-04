@@ -59,4 +59,7 @@ async function bootstrap() {
   await app.listen(port);
   Logger.log(`REID API running on port ${port}`, 'Bootstrap');
 }
-bootstrap();
+bootstrap().catch((err) => {
+  Logger.error(`Failed to start REID API: ${err.message}`, err.stack, 'Bootstrap');
+  process.exit(1);
+});
