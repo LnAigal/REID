@@ -5,7 +5,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for HMAC-SHA256 security'),
   CSRF_SECRET: z.string().min(32, 'CSRF_SECRET must be at least 32 characters for HMAC-SHA256 security'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CORS_ORIGIN: z.string().url().optional(),
+  CORS_ORIGIN: z.string().url(),
   API_PREFIX: z.string().optional(),
   API_PORT: z.coerce.number().int().positive().optional(),
   BREVO_API_KEY: z.string().optional(),
