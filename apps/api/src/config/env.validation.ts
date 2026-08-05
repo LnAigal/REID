@@ -8,6 +8,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().url(),
   API_PREFIX: z.string().optional(),
   API_PORT: z.coerce.number().int().positive().optional(),
+  TRUST_PROXY: z.enum(['true', 'false']).default('false'),
   BREVO_API_KEY: z.string().optional(),
   DEFAULT_MAIL_PROVIDER: z.enum(['brevo', 'custom_smtp']).default('brevo'),
   APP_NAME: z.string().optional(),
