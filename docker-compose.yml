@@ -42,6 +42,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL in .env}
         NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-REID}
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (min 32 chars)}
     restart: unless-stopped
     ports:
       - "3000:3000"
