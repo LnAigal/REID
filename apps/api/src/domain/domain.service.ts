@@ -29,6 +29,11 @@ export class DomainService {
             {
               type: 'TXT',
               name: name,
+              value: verificationToken,
+            },
+            {
+              type: 'TXT',
+              name: name,
               value: `v=spf1 include:reid.dev ~all`,
             },
             {

@@ -40,6 +40,19 @@ describe('DomainService', () => {
       expect(prisma.domain.create).toHaveBeenCalled();
     });
 
+    it('should include a TXT record with the verification token', async () => {
+      prisma.domain.findUnique.mockResolvedValue(null);
+      prisma.domain.create.mockResolvedValue({ id: '1', name: 'test.com', records: [] });
+
+      await service.create('user1', 'test.com');
+
+      const createCall = prisma.domain.create.mock.calls[0][0];
+      const recordValues = createCall.data.records.create.map((r: { value: string }) => r.value);
+      const verificationToken = createCall.data.verificationToken;
+      expect(recordValues).toContain(verificationToken);
+      expect(recordValues).toContain('v=spf1 include:reid.dev ~all');
+    });
+
     it('should throw BadRequestException for duplicate domain', async () => {
       prisma.domain.findUnique.mockResolvedValue({ id: '1', name: 'test.com' });
 

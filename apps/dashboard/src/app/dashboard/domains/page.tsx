@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, Plus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Globe, Plus, CheckCircle2, XCircle, Trash2, Copy } from "lucide-react";
 import { api } from "../../../lib/api";
 
 interface DomainRecord {
@@ -14,6 +14,7 @@ interface Domain {
   id: string;
   name: string;
   status: string;
+  verificationToken?: string;
   records: DomainRecord[];
 }
 
@@ -62,6 +63,10 @@ export default function DomainsPage() {
     } catch {
       alert("Failed to delete domain");
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -128,6 +133,24 @@ export default function DomainsPage() {
 
               {expandedDomain === domain.id && (
                 <div className="border-t border-white/10 p-4 space-y-3">
+                  {domain.verificationToken && (
+                    <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-3">
+                      <p className="text-sm font-medium text-violet-400 mb-1">Domain Verification</p>
+                      <p className="text-xs text-zinc-400 mb-2">
+                        Add a TXT record at the root of your domain with this exact value to verify ownership:
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-sm font-mono text-zinc-300 flex-1 truncate">{domain.verificationToken}</code>
+                        <button
+                          onClick={() => copyToClipboard(domain.verificationToken!)}
+                          className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+                          title="Copy verification token"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <h4 className="text-sm font-medium text-zinc-400">DNS Records</h4>
                   {domain.records?.map((record, i) => (
                     <div key={i} className="flex items-center gap-4 rounded-lg bg-black/50 p-3">
