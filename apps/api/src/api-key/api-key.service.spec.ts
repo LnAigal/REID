@@ -59,6 +59,33 @@ describe('ApiKeyService', () => {
     });
   });
 
+  describe('validateKey', () => {
+    it('should return userId and keyId for a valid key', async () => {
+      const rawKey = `reid_live_${'a'.repeat(32)}`;
+      prisma.apiKey.findFirst.mockResolvedValue({ id: 'key1', user: { id: 'user1' } });
+      prisma.apiKey.update.mockResolvedValue({});
+
+      const result = await service.validateKey(rawKey);
+
+      expect(result).toEqual({ userId: 'user1', keyId: 'key1' });
+      expect(prisma.apiKey.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            prefix: `reid_live_${'a'.repeat(12)}`,
+          }),
+        }),
+      );
+    });
+
+    it('should return null when the key does not exist', async () => {
+      prisma.apiKey.findFirst.mockResolvedValue(null);
+
+      const result = await service.validateKey(`reid_live_${'b'.repeat(32)}`);
+
+      expect(result).toBeNull();
+    });
+  });
+
   describe('remove', () => {
     it('should delete an existing key', async () => {
       prisma.apiKey.findFirst.mockResolvedValue({ id: '1', userId: 'user1' });

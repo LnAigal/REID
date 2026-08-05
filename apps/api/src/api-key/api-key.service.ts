@@ -93,7 +93,7 @@ export class ApiKeyService {
 
   async validateKey(rawKey: string): Promise<{ userId: string; keyId: string } | null> {
     const prefix = rawKey.startsWith('reid_live_') ? 'reid_live' : 'reid_test';
-    const keyPrefix = `${prefix}_${rawKey.substring(0, 12)}`;
+    const keyPrefix = rawKey.slice(0, prefix.length + 1 + 12);
     const hashedRawKey = await this.hashKey(rawKey);
 
     const apiKey = await this.prisma.apiKey.findFirst({
