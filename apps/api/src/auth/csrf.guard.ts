@@ -4,24 +4,10 @@ import * as crypto from 'crypto';
 
 const CSRF_TOKEN_COOKIE = 'csrf_token';
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
-const CSRF_SECRET_LENGTH = 32;
+const CSRF_TOKEN_LENGTH = 32;
 
-function getCsrfSecret(): Buffer {
-  const secret = process.env.CSRF_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error('CSRF_SECRET must be set and at least 32 characters');
-  }
-  return Buffer.from(secret);
-}
-
-function hmacSign(token: string, secret: Buffer): string {
-  return crypto.createHmac('sha256', secret).update(token).digest('hex');
-}
-
-export function generateCsrfToken(): { raw: string; signature: string } {
-  const raw = crypto.randomBytes(CSRF_SECRET_LENGTH).toString('hex');
-  const signature = hmacSign(raw, getCsrfSecret());
-  return { raw, signature };
+export function generateCsrfToken(): string {
+  return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
 }
 
 @Injectable()
@@ -39,22 +25,19 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
-    const cookieSignature = request.cookies?.[CSRF_TOKEN_COOKIE];
+    const cookieToken = request.cookies?.[CSRF_TOKEN_COOKIE];
     const headerToken = request.headers[CSRF_TOKEN_HEADER] as string | undefined;
 
-    if (!cookieSignature || !headerToken) {
+    if (!cookieToken || !headerToken) {
       throw new ForbiddenException('CSRF token missing');
     }
 
-    const secret = getCsrfSecret();
-    const expectedSignature = hmacSign(headerToken, secret);
-
-    const cookieBuffer = Buffer.from(cookieSignature, 'hex');
-    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    const cookieBuffer = Buffer.from(cookieToken, 'utf8');
+    const headerBuffer = Buffer.from(headerToken, 'utf8');
 
     if (
-      cookieBuffer.length !== expectedBuffer.length ||
-      !crypto.timingSafeEqual(cookieBuffer, expectedBuffer)
+      cookieBuffer.length !== headerBuffer.length ||
+      !crypto.timingSafeEqual(cookieBuffer, headerBuffer)
     ) {
       throw new ForbiddenException('CSRF token invalid');
     }
@@ -64,8 +47,8 @@ export class CsrfGuard implements CanActivate {
 }
 
 export function setCsrfCookie(res: Response): string {
-  const { raw, signature } = generateCsrfToken();
-  res.cookie(CSRF_TOKEN_COOKIE, signature, {
+  const raw = generateCsrfToken();
+  res.cookie(CSRF_TOKEN_COOKIE, raw, {
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
