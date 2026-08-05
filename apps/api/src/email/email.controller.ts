@@ -5,32 +5,42 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { Type } from 'class-transformer';
-import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, IsInt, Min, Max } from 'class-validator';
+import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, ArrayMaxSize, IsInt, Min, Max, Validate } from 'class-validator';
+import { ValidHeaders } from './headers.validator';
 
-class SendEmailDto {
+export class SendEmailDto {
   @IsEmail()
+  @MaxLength(254)
   from: string;
 
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(50)
   @IsEmail({}, { each: true })
+  @MaxLength(254, { each: true })
   to: string[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(50)
   @IsEmail({}, { each: true })
+  @MaxLength(254, { each: true })
   cc?: string[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(50)
   @IsEmail({}, { each: true })
+  @MaxLength(254, { each: true })
   bcc?: string[];
 
   @IsOptional()
   @IsEmail()
+  @MaxLength(254)
   replyTo?: string;
 
   @IsString()
+  @MaxLength(998)
   subject: string;
 
   @IsOptional()
@@ -45,6 +55,7 @@ class SendEmailDto {
 
   @IsOptional()
   @IsObject()
+  @Validate(ValidHeaders)
   headers?: Record<string, string>;
 }
 
