@@ -1,19 +1,31 @@
-const DANGEROUS_TAGS = /<\/?(?:script|iframe|object|embed|form|input|textarea|button|select|option|optgroup|datalist|keygen|output|progress|meter|label|legend|fieldset|isindex|marquee|applet|meta|link|base|basefont|style|title|head|body|html|frame|frameset|noframes|noembed|noscript|xmp|plaintext|listing|image|svg|math|annotation|annotation-xml|mi|mo|mn|ms|mtext|foreignObject|desc|title|animate|animateMotion|animateTransform|set|discard|handler|malignmark)\b[^>]*>/gi;
-const DANGEROUS_ATTRS = /\s+(?:on\w+|formaction|formmethod|xlink:href|href|src|action|background|poster|codebase|data|longdesc|usemap|classid|archive)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
-const DANGEROUS_PROTOCOLS = /(?:javascript|data|vbscript|blob|file|ftp):/gi;
-const HTML_COMMENTS = /<!--[\s\S]*?-->/g;
-const CDATA = /<!\[CDATA\[[\s\S]*?\]\]>/g;
+import * as sanitize from 'sanitize-html';
+
+const SANITIZE_OPTIONS: sanitize.IOptions = {
+  allowedTags: [
+    'p', 'div', 'span', 'br', 'hr',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'blockquote',
+    'a', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+    'sub', 'sup', 'small', 'code', 'pre',
+    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+    'img',
+  ],
+  allowedAttributes: {
+    '*': ['align', 'title', 'width', 'height', 'valign'],
+    'a': ['href', 'name', 'target', 'rel'],
+    'img': ['src', 'alt', 'width', 'height'],
+    'td': ['colspan', 'rowspan'],
+    'th': ['colspan', 'rowspan'],
+    'table': ['border', 'cellpadding', 'cellspacing', 'bgcolor', 'width'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowProtocolRelative: false,
+  disallowedTagsMode: 'discard',
+};
 
 export function sanitizeHtml(html: string): string {
-  return html
-    .replace(HTML_COMMENTS, '')
-    .replace(CDATA, '')
-    .replace(DANGEROUS_PROTOCOLS, 'blocked:')
-    .replace(DANGEROUS_ATTRS, '')
-    .replace(DANGEROUS_TAGS, '');
-}
-
-export function sanitizeOptionalHtml(html: string | undefined | null): string | undefined | null {
+  return sanitize(html, SANITIZE_OPTIONS);
+}export function sanitizeOptionalHtml(html: string | undefined | null): string | undefined | null {
   if (!html) return html;
   return sanitizeHtml(html);
 }
