@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiKeyService } from '../api-key/api-key.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -20,13 +20,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (authHeader?.startsWith('Bearer reid_')) {
       const rawKey = authHeader.slice(7);
       const result = await this.apiKeyService.validateKey(rawKey);
-      if (!result) return false;
+      if (!result) throw new UnauthorizedException('Invalid API key');
 
       const user = await this.prisma.user.findUnique({
         where: { id: result.userId },
         select: { id: true, email: true, name: true, role: true },
       });
-      if (!user) return false;
+      if (!user) throw new UnauthorizedException('Invalid API key');
 
       request.user = user;
       request.apiKeyId = result.keyId;
