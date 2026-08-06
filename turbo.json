@@ -7,6 +7,12 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": ["NODE_ENV"]
     },
+    "@repo/shared#build": {
+      "outputs": []
+    },
+    "@repo/ui#build": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
