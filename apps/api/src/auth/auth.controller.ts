@@ -88,11 +88,12 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Create a new account' })
   @ApiResponse({ status: 201, description: 'Account created successfully' })
-  @ApiResponse({ status: 409, description: 'Email already registered' })
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.signup(dto.email, dto.name, dto.password);
-    this.authService.setAuthCookie(res, result.token);
-    setCsrfCookie(res);
+    if (result.token) {
+      this.authService.setAuthCookie(res, result.token);
+      setCsrfCookie(res);
+    }
     return { success: true, data: result };
   }
 
