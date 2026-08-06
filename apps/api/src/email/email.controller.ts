@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { EmailService } from './email.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { Type } from 'class-transformer';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, ArrayMaxSize, IsInt, Min, Max, Validate } from 'class-validator';
@@ -84,6 +85,7 @@ export class EmailController {
   constructor(private emailService: EmailService) {}
 
   @Post()
+  @Throttle({ default: { limit: 600, ttl: 60000 } })
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send an email' })
