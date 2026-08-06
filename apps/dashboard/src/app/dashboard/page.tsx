@@ -40,7 +40,7 @@ export default function DashboardOverview() {
   }, []);
 
   const overviewStats = [
-    { name: "Emails Sent", value: stats?.total?.toLocaleString() ?? "—", change: "", up: true, icon: Mail },
+    { name: "Total Emails", value: stats?.total?.toLocaleString() ?? "—", change: "", up: true, icon: Mail },
     { name: "Success Rate", value: stats ? `${stats.successRate.toFixed(1)}%` : "—", change: "", up: true, icon: TrendingUp },
     { name: "Domains", value: String(domains.length), change: "", up: true, icon: Globe },
     { name: "API Keys", value: String(apiKeys.length), change: "", up: true, icon: Key },

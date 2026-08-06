@@ -52,7 +52,7 @@ export class AnalyticsService {
       delivered: deliveredEmails,
       failed: failedEmails,
       bounced: bouncedEmails,
-      emailsSent: totalEmails,
+      emailsSent: sentEmails,
       successRate: Math.round(successRate * 100) / 100,
       failureRate: Math.round(failureRate * 100) / 100,
       bounceRate: Math.round(bounceRate * 100) / 100,
