@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 import { PrismaService } from '../prisma/prisma.service';
+import * as crypto from 'crypto';
 
 describe('WebhookService', () => {
   let service: WebhookService;
@@ -116,7 +117,6 @@ describe('WebhookService', () => {
     it('accepts a request with a valid signature', () => {
       config.get.mockReturnValue('secret');
       const rawBody = Buffer.from('{"event":"delivered"}');
-      const crypto = require('crypto');
       const signature = crypto.createHmac('sha256', 'secret').update(rawBody).digest('hex');
 
       expect(() =>
