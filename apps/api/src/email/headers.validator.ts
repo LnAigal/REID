@@ -4,7 +4,14 @@ const MAX_HEADERS = 20;
 const MAX_HEADER_KEY_LENGTH = 50;
 const MAX_HEADER_VALUE_LENGTH = 500;
 const BLOCKED_HEADERS = new Set(['to', 'from', 'bcc', 'subject']);
-const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+
+function hasControlChars(value: string): boolean {
+  for (const char of value) {
+    const code = char.charCodeAt(0);
+    if (code < 0x20 || code === 0x7f) return true;
+  }
+  return false;
+}
 
 @ValidatorConstraint({ name: 'validHeaders', async: false })
 export class ValidHeaders implements ValidatorConstraintInterface {
@@ -18,7 +25,7 @@ export class ValidHeaders implements ValidatorConstraintInterface {
         !BLOCKED_HEADERS.has(key.toLowerCase()) &&
         typeof val === 'string' &&
         val.length <= MAX_HEADER_VALUE_LENGTH &&
-        !CONTROL_CHARS.test(val),
+        !hasControlChars(val),
     );
   }
 
