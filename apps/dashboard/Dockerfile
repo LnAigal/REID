@@ -15,8 +15,10 @@ COPY --from=deps /app/apps/dashboard/node_modules ./apps/dashboard/node_modules
 COPY . .
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_APP_NAME=REID
+ARG NEXT_PUBLIC_DOCS_URL=http://localhost:3002
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
-    NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
+    NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME} \
+    NEXT_PUBLIC_DOCS_URL=${NEXT_PUBLIC_DOCS_URL}
 RUN npm run build --workspace=apps/dashboard
 
 FROM base AS runner

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Mail, Shield, Zap, Code2, BarChart3, Globe } from "lucide-react";
 
+const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL ?? "http://localhost:3002";
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white">
@@ -15,7 +17,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+            <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Docs</a>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -71,7 +73,9 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
-              href="/docs"
+              href={DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-all"
             >
               Read the Docs
@@ -233,7 +237,7 @@ await reid.emails.send({
               <span className="text-lg font-bold">REID</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+              <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Docs</a>
               <a href="#" className="hover:text-white transition-colors">GitHub</a>
               <a href="#" className="hover:text-white transition-colors">Twitter</a>
             </div>
