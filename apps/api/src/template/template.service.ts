@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
-import { sanitizeHtml, sanitizeOptionalHtml } from '../utils/sanitize';
+import { sanitizeHtml } from '../utils/sanitize';
 
 @Injectable()
 export class TemplateService {
@@ -12,7 +12,6 @@ export class TemplateService {
       data: {
         ...data,
         html: sanitizeHtml(data.html),
-        text: sanitizeOptionalHtml(data.text),
         variables: data.variables as unknown as Prisma.InputJsonValue,
         userId,
       },
@@ -38,9 +37,6 @@ export class TemplateService {
     const sanitizedData: typeof data = { ...data };
     if (sanitizedData.html) {
       sanitizedData.html = sanitizeHtml(sanitizedData.html);
-    }
-    if (sanitizedData.text) {
-      sanitizedData.text = sanitizeOptionalHtml(sanitizedData.text) ?? undefined;
     }
     const template = await this.prisma.template.updateMany({
       where: { id: templateId, userId },
