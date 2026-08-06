@@ -4,22 +4,26 @@ import { TemplateService } from './template.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
-import { IsString, MinLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, IsOptional, MaxLength } from 'class-validator';
 
 class CreateTemplateDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(100)
   name: string;
 
   @IsString()
   @MinLength(1)
+  @MaxLength(998)
   subject: string;
 
   @IsString()
+  @MaxLength(50000)
   html: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(50000)
   text?: string;
 }
 
@@ -27,19 +31,23 @@ class UpdateTemplateDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(100)
   name?: string;
 
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(998)
   subject?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(50000)
   html?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(50000)
   text?: string;
 }
 
