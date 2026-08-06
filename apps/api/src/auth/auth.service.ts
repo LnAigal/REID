@@ -178,8 +178,8 @@ export class AuthService {
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
           <h2>Welcome to ${appName}!</h2>
           <p>Click the button below to verify your email address:</p>
-          <a href="${verifyLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Verify Email</a>
-          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${verifyLink}">${verifyLink}</a></p>
+          <a href="${verifyLink}" referrerpolicy="no-referrer" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Verify Email</a>
+          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${verifyLink}" referrerpolicy="no-referrer">${verifyLink}</a></p>
           <p style="color: #999; font-size: 12px;">This link expires in 24 hours.</p>
         </div>
       `,
@@ -239,8 +239,8 @@ export class AuthService {
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
           <h2>Password Reset</h2>
           <p>Click the button below to reset your password:</p>
-          <a href="${resetLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a>
-          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${resetLink}">${resetLink}</a></p>
+          <a href="${resetLink}" referrerpolicy="no-referrer" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a>
+          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${resetLink}" referrerpolicy="no-referrer">${resetLink}</a></p>
           <p style="color: #999; font-size: 12px;">This link expires in 1 hour.</p>
           <p style="color: #999; font-size: 12px;">If you didn't request this, you can ignore this email.</p>
         </div>
