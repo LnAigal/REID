@@ -53,4 +53,18 @@ describe('SendEmailDto', () => {
     const errors = await errorsFor({ headers });
     expect(errors).toHaveLength(0);
   });
+
+  it('rejects headers that override routing fields', async () => {
+    for (const name of ['To', 'from', 'BCC', 'SUBJECT']) {
+      const errors = await errorsFor({ headers: { [name]: 'hijack@example.com' } });
+      expect(errors.map((e) => e.property)).toContain('headers');
+    }
+  });
+
+  it('rejects header values containing control characters', async () => {
+    for (const value of ['a\r\nBcc: victim@example.com', 'line1\nline2']) {
+      const errors = await errorsFor({ headers: { 'X-Custom': value } });
+      expect(errors.map((e) => e.property)).toContain('headers');
+    }
+  });
 });
