@@ -31,7 +31,7 @@ export class EmailService {
 
     const domain = this.extractDomain(data.from);
     const domainRecord = await this.prisma.domain.findFirst({
-      where: { name: domain, userId, status: 'VERIFIED' },
+      where: { name: { equals: domain, mode: 'insensitive' }, userId, status: 'VERIFIED' },
     });
 
     if (!domainRecord) {
