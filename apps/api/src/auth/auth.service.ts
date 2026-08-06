@@ -48,6 +48,10 @@ export class AuthService {
 
     const token = this.generateToken({ sub: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
 
+    if (!(await this.sendVerificationMail(user))) {
+      this.logger.warn(`Verification email could not be sent for new user ${user.id}`);
+    }
+
     return { user, token };
   }
 
@@ -144,11 +148,20 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('User not found');
     if (user.emailVerified) throw new BadRequestException('Email already verified');
 
+    if (!(await this.sendVerificationMail(user))) {
+      this.logger.error(`Verification email send failed for ${user.id}`);
+      throw new BadRequestException('Failed to send verification email. Please try again.');
+    }
+
+    return { message: 'Verification email sent' };
+  }
+
+  private async sendVerificationMail(user: { id: string; email: string }): Promise<boolean> {
     const verificationToken = randomUUID();
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await this.prisma.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: { verificationToken, verificationTokenExpires },
     });
 
@@ -172,12 +185,7 @@ export class AuthService {
       text: `Welcome to ${appName}! Verify your email by visiting: ${verifyLink}`,
     });
 
-    if (!result.success) {
-      this.logger.error(`Verification email send failed for ${user.id}: ${result.error}`);
-      throw new BadRequestException('Failed to send verification email. Please try again.');
-    }
-
-    return { message: 'Verification email sent' };
+    return result.success;
   }
 
   async verifyEmail(token: string) {

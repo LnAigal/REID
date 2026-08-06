@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Shield } from "lucide-react";
+import { User, Shield, Mail } from "lucide-react";
 import { api } from "../../../lib/api";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
-  const [profile, setProfile] = useState<{ name?: string; email: string } | null>(null);
+  const [profile, setProfile] = useState<{ name?: string; email: string; emailVerified?: boolean } | null>(null);
   const [name, setName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.getProfile().then((r) => {
@@ -53,6 +55,20 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSendVerification = async () => {
+    setSendingVerification(true);
+    setVerificationMessage(null);
+    try {
+      const res = await api.sendVerification();
+      setVerificationMessage(res.data.message || "Verification email sent");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to send verification email";
+      setVerificationMessage(message);
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -82,6 +98,32 @@ export default function SettingsPage() {
 
       {activeTab === "profile" && (
         <div className="max-w-2xl space-y-6">
+          {profile && !profile.emailVerified && (
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-amber-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium mb-1">Verify your email address</h3>
+                  <p className="text-sm text-zinc-400 mb-4">
+                    You must verify your email before you can send emails. Check your inbox or request a new link.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleSendVerification}
+                      disabled={sendingVerification}
+                      className="rounded-lg bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-50"
+                    >
+                      {sendingVerification ? "Sending..." : "Resend verification email"}
+                    </button>
+                    {verificationMessage && (
+                      <span className="text-sm text-zinc-400">{verificationMessage}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-xl border border-white/10 bg-white/5 p-6">
             <h3 className="text-lg font-medium mb-4">Profile Information</h3>
             <div className="space-y-4">
