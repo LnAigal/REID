@@ -11,6 +11,7 @@ import { ApiKeyModule } from './api-key/api-key.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { TemplateModule } from './template/template.module';
 import { MailModule } from './mail/mail.module';
+import { WebhookModule } from './webhook/webhook.module';
 import { validate } from './config/env.validation';
 
 const trackByApiKeyOrIp = (req: Record<string, any>): string => {
@@ -37,6 +38,7 @@ const trackByApiKeyOrIp = (req: Record<string, any>): string => {
     AnalyticsModule,
     TemplateModule,
     MailModule,
+    WebhookModule,
   ],
   providers: [
     {

@@ -19,6 +19,7 @@ const envSchema = z.object({
   SMTP_SECURE: z.string().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
+  WEBHOOK_SECRET: z.string().optional(),
 });
 
 export function validate(config: Record<string, unknown>) {
