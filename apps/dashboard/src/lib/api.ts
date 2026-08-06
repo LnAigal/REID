@@ -50,6 +50,14 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      document.cookie = "token=; Max-Age=0; path=/";
+      document.cookie = "csrf_token=; Max-Age=0; path=/";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+      throw new Error("Session expired, redirecting to login");
+    }
     const body: Record<string, unknown> = await res.json().catch(() => ({}));
     const message = typeof body.message === "string"
       ? body.message
