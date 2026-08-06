@@ -48,6 +48,9 @@ cp apps/dashboard/.env.example apps/dashboard/.env
 # Generate Prisma client
 npm run db:generate
 
+# Build workspace packages (required before dev — @repo/database resolves via dist/)
+npm run build
+
 # Push database schema
 npm run db:push
 
