@@ -64,6 +64,7 @@ export class EmailService {
       data: { status: 'PROCESSING' },
     });
 
+    const latencyStartedAt = Date.now();
     let result: { success: boolean; messageId?: string; provider: string; error?: string };
     try {
       result = await this.mailService.send({ ...data, html: sanitizedHtml ?? undefined });
@@ -82,6 +83,7 @@ export class EmailService {
       updateData.status = 'SENT';
       updateData.providerId = result.messageId;
       updateData.sentAt = new Date();
+      updateData.latency = Date.now() - latencyStartedAt;
     } else {
       updateData.status = 'FAILED';
       updateData.errorMessage = result.error ?? null;
