@@ -115,7 +115,7 @@ console.log(email.id); // "reid_abc123"`}
               <span className="text-xs text-zinc-500 font-mono">cURL</span>
             </div>
             <pre className="p-4 text-sm font-mono text-zinc-300">
-{`curl -X POST https://api.reid.dev/v1/emails \\
+{`curl -X POST https://api.reid.dev/api/v1/emails \\
   -H "Authorization: Bearer reid_live_xxxxxxxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -131,7 +131,7 @@ console.log(email.id); // "reid_abc123"`}
         <section id="send-email" className="mb-16">
           <h2 className="text-2xl font-bold mb-4">Send Email</h2>
           <p className="text-zinc-400 mb-6">
-            The <code className="text-violet-400">POST /v1/emails</code> endpoint sends an email.
+            The <code className="text-violet-400">POST /api/v1/emails</code> endpoint sends an email.
           </p>
 
           <h3 className="text-lg font-semibold mb-3">Request Body</h3>
@@ -179,7 +179,7 @@ console.log(email.id); // "reid_abc123"`}
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <h4 className="font-medium mb-2">1. Add your domain</h4>
               <code className="text-sm font-mono text-zinc-400">
-                POST /v1/domains {`{ "name": "yourdomain.com" }`}
+                POST /api/v1/domains {`{ "name": "yourdomain.com" }`}
               </code>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -191,7 +191,7 @@ console.log(email.id); // "reid_abc123"`}
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <h4 className="font-medium mb-2">3. Verify</h4>
               <code className="text-sm font-mono text-zinc-400">
-                POST /v1/domains/:id/verify
+                POST /api/v1/domains/:id/verify
               </code>
             </div>
           </div>

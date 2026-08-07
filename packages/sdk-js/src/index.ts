@@ -52,7 +52,7 @@ export class REID {
       throw new Error("API key is required");
     }
     this.apiKey = apiKey;
-    this.baseUrl = options?.baseUrl || "https://api.reid.dev/v1";
+    this.baseUrl = options?.baseUrl || "https://api.reid.dev/api/v1";
   }
 
   get emails() {
