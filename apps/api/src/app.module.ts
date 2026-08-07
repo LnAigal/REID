@@ -5,6 +5,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { createHash } from 'crypto';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { CsrfModule } from './auth/csrf.module';
 import { EmailModule } from './email/email.module';
 import { DomainModule } from './domain/domain.module';
 import { ApiKeyModule } from './api-key/api-key.module';
@@ -31,6 +32,7 @@ const trackByApiKeyOrIp = (req: Record<string, any>): string => {
       getTracker: trackByApiKeyOrIp,
     }]),
     PrismaModule,
+    CsrfModule,
     AuthModule,
     EmailModule,
     DomainModule,

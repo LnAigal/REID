@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CsrfGuard, setCsrfCookie } from './csrf.guard';
+import { CsrfService } from './csrf.service';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { IsEmail, IsString, IsUrl, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
@@ -82,7 +83,10 @@ class ResetPasswordDto {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private csrfService: CsrfService,
+  ) {}
 
   @Post('signup')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -92,7 +96,7 @@ export class AuthController {
     const result = await this.authService.signup(dto.email, dto.name, dto.password);
     if (result.token) {
       this.authService.setAuthCookie(res, result.token);
-      setCsrfCookie(res);
+      setCsrfCookie(res, this.csrfService.generateToken());
     }
     return { success: true, data: result };
   }
@@ -105,7 +109,7 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto.email, dto.password);
     this.authService.setAuthCookie(res, result.token);
-    setCsrfCookie(res);
+    setCsrfCookie(res, this.csrfService.generateToken());
     return { success: true, data: result };
   }
 
