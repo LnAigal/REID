@@ -45,6 +45,8 @@ npm install
 cp apps/api/.env.example apps/api/.env
 cp apps/dashboard/.env.example apps/dashboard/.env
 
+> `apps/dashboard/.env` needs `JWT_SECRET` set to the same value as `apps/api/.env` — the dashboard middleware verifies the auth cookie with it.
+
 # Generate Prisma client
 npm run db:generate
 
