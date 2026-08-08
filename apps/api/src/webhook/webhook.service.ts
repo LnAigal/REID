@@ -39,7 +39,10 @@ export class WebhookService {
   verifySignature(req: Request, provider: string): void {
     const secret = this.config.get('WEBHOOK_SECRET');
     if (!secret) {
-      this.logger.warn(`WEBHOOK_SECRET not set; accepting unsigned ${provider} webhook`);
+      if (process.env.NODE_ENV === 'production') {
+        throw new UnauthorizedException('WEBHOOK_SECRET is not configured');
+      }
+      this.logger.warn(`WEBHOOK_SECRET not set; accepting unsigned ${provider} webhook (development only)`);
       return;
     }
 

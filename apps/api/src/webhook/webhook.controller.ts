@@ -1,8 +1,10 @@
 import { Controller, Post, Param, Req, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 
+@SkipThrottle()
 @ApiTags('webhooks')
 @Controller('webhooks')
 export class WebhookController {
