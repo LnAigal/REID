@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { CsrfService } from './csrf.service';
+import { cookieDomain } from './cookie.utils';
 
 const CSRF_TOKEN_COOKIE = 'csrf_token';
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
@@ -34,10 +35,12 @@ export class CsrfGuard implements CanActivate {
 }
 
 export function setCsrfCookie(res: Response, raw: string): void {
+  const domain = cookieDomain();
   res.cookie(CSRF_TOKEN_COOKIE, raw, {
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...(domain ? { domain } : {}),
   });
 }

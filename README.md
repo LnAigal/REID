@@ -46,6 +46,8 @@ cp apps/api/.env.example apps/api/.env
 cp apps/dashboard/.env.example apps/dashboard/.env
 
 > `apps/dashboard/.env` needs `JWT_SECRET` set to the same value as `apps/api/.env` — the dashboard middleware verifies the auth cookie with it.
+>
+> If the API and dashboard run on different subdomains of the same domain (e.g. `api.reid.dev` and `app.reid.dev`), set `COOKIE_DOMAIN=".reid.dev"` in `apps/api/.env` so the auth cookie is also sent to the dashboard. Leave it unset for localhost/single-domain setups.
 
 # Generate Prisma client
 npm run db:generate

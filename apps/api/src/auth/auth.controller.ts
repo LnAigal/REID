@@ -6,6 +6,7 @@ import { CsrfGuard, setCsrfCookie } from './csrf.guard';
 import { CsrfService } from './csrf.service';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
+import { cookieDomain } from './cookie.utils';
 import { IsEmail, IsString, IsUrl, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
 
 class SignupDto {
@@ -118,11 +119,13 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Sign out' })
   async logout(@Res({ passthrough: true }) res: Response) {
+    const domain = cookieDomain();
     this.authService.clearAuthCookie(res);
     res.clearCookie('csrf_token', {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
+      ...(domain ? { domain } : {}),
     });
     return { success: true, message: 'Logged out successfully' };
   }

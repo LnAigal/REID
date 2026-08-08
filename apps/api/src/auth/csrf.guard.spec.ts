@@ -98,4 +98,39 @@ describe('setCsrfCookie', () => {
       expect.objectContaining({ httpOnly: false, sameSite: 'strict' }),
     );
   });
+
+  it('scopes the cookie to the shared parent domain when COOKIE_DOMAIN is set', () => {
+    const previousDomain = process.env.COOKIE_DOMAIN;
+    process.env.COOKIE_DOMAIN = '.reid.dev';
+
+    try {
+      const cookie = jest.fn();
+      const res = { cookie } as never;
+      setCsrfCookie(res, 'token.signature');
+      expect(cookie).toHaveBeenCalledWith(
+        'csrf_token',
+        'token.signature',
+        expect.objectContaining({ domain: '.reid.dev' }),
+      );
+    } finally {
+      process.env.COOKIE_DOMAIN = previousDomain;
+    }
+  });
+
+  it('omits the Domain attribute when COOKIE_DOMAIN is unset', () => {
+    const previousDomain = process.env.COOKIE_DOMAIN;
+    delete process.env.COOKIE_DOMAIN;
+
+    try {
+      const cookie = jest.fn();
+      const res = { cookie } as never;
+      setCsrfCookie(res, 'token.signature');
+      const options = cookie.mock.calls[0][2] as Record<string, unknown>;
+      expect(options.domain).toBeUndefined();
+    } finally {
+      if (previousDomain !== undefined) {
+        process.env.COOKIE_DOMAIN = previousDomain;
+      }
+    }
+  });
 });

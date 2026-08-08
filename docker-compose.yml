@@ -27,6 +27,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-reid}?schema=public
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (min 32 chars)}
       CSRF_SECRET: ${CSRF_SECRET:?Set CSRF_SECRET in .env (min 32 chars)}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       API_PORT: 3001
       API_PREFIX: api/v1

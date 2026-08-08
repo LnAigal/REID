@@ -6,6 +6,7 @@ import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { Response } from 'express';
+import { cookieDomain } from './cookie.utils';
 
 export interface JwtPayload {
   sub: string;
@@ -286,19 +287,23 @@ export class AuthService {
   }
 
   setAuthCookie(res: Response, token: string) {
+    const domain = cookieDomain();
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      ...(domain ? { domain } : {}),
     });
   }
 
   clearAuthCookie(res: Response) {
+    const domain = cookieDomain();
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      ...(domain ? { domain } : {}),
     });
   }
 
