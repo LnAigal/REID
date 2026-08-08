@@ -71,38 +71,56 @@ export class AnalyticsService {
     const now = new Date();
     const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
-    const emails = await this.prisma.email.findMany({
-      where: { userId, createdAt: { gte: startDate } },
-      select: { status: true, createdAt: true },
-    });
+    const rows = await this.prisma.$queryRaw<
+      Array<{ date: string; status: string; count: number }>
+    >`
+      SELECT to_char("createdAt" AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS date,
+             status,
+             COUNT(*)::int AS count
+      FROM emails
+      WHERE "user_id" = ${userId} AND "createdAt" >= ${startDate}
+      GROUP BY date, status
+    `;
 
-    const chartData: Record<string, { date: string; sent: number; delivered: number; failed: number; bounced: number }> = {};
+    const counts = new Map<
+      string,
+      { sent: number; delivered: number; failed: number; bounced: number }
+    >();
 
+    for (const row of rows) {
+      const bucket = counts.get(row.date) ?? { sent: 0, delivered: 0, failed: 0, bounced: 0 };
+      switch (row.status) {
+        case 'SENT':
+          bucket.sent += row.count;
+          break;
+        case 'DELIVERED':
+          bucket.sent += row.count;
+          bucket.delivered += row.count;
+          break;
+        case 'FAILED':
+          bucket.failed += row.count;
+          break;
+        case 'BOUNCED':
+          bucket.bounced += row.count;
+          break;
+      }
+      counts.set(row.date, bucket);
+    }
+
+    const chartData: { date: string; sent: number; delivered: number; failed: number; bounced: number }[] = [];
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
       const key = date.toISOString().split('T')[0];
-      chartData[key] = { date: key, sent: 0, delivered: 0, failed: 0, bounced: 0 };
+      const bucket = counts.get(key);
+      chartData.push({
+        date: key,
+        sent: bucket?.sent ?? 0,
+        delivered: bucket?.delivered ?? 0,
+        failed: bucket?.failed ?? 0,
+        bounced: bucket?.bounced ?? 0,
+      });
     }
 
-    emails.forEach(email => {
-      const key = email.createdAt.toISOString().split('T')[0];
-      if (chartData[key]) {
-        switch (email.status) {
-          case 'SENT':
-          case 'DELIVERED':
-            chartData[key].sent++;
-            if (email.status === 'DELIVERED') chartData[key].delivered++;
-            break;
-          case 'FAILED':
-            chartData[key].failed++;
-            break;
-          case 'BOUNCED':
-            chartData[key].bounced++;
-            break;
-        }
-      }
-    });
-
-    return Object.values(chartData);
+    return chartData;
   }
 }
