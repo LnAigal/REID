@@ -164,6 +164,7 @@ model Email {
   @@index([userId])
   @@index([apiKeyId])
   @@index([domainId])
+  @@index([providerId])
   @@index([status])
   @@index([createdAt])
   @@map("emails")
