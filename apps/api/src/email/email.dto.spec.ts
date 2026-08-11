@@ -55,7 +55,7 @@ describe('SendEmailDto', () => {
   });
 
   it('rejects headers that override routing fields', async () => {
-    for (const name of ['To', 'from', 'BCC', 'SUBJECT']) {
+    for (const name of ['To', 'from', 'Cc', 'BCC', 'Reply-To', 'SUBJECT']) {
       const errors = await errorsFor({ headers: { [name]: 'hijack@example.com' } });
       expect(errors.map((e) => e.property)).toContain('headers');
     }

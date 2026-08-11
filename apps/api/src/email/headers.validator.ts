@@ -3,7 +3,7 @@ import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments 
 const MAX_HEADERS = 20;
 const MAX_HEADER_KEY_LENGTH = 50;
 const MAX_HEADER_VALUE_LENGTH = 500;
-const BLOCKED_HEADERS = new Set(['to', 'from', 'bcc', 'subject']);
+const BLOCKED_HEADERS = new Set(['to', 'from', 'cc', 'bcc', 'subject', 'reply-to']);
 
 function hasControlChars(value: string): boolean {
   for (const char of value) {
@@ -30,6 +30,6 @@ export class ValidHeaders implements ValidatorConstraintInterface {
   }
 
   defaultMessage(_args: ValidationArguments): string {
-    return `headers must have at most ${MAX_HEADERS} entries, keys up to ${MAX_HEADER_KEY_LENGTH} characters, string values up to ${MAX_HEADER_VALUE_LENGTH} characters without control characters, and must not override To, From, Bcc or Subject`;
+    return `headers must have at most ${MAX_HEADERS} entries, keys up to ${MAX_HEADER_KEY_LENGTH} characters, string values up to ${MAX_HEADER_VALUE_LENGTH} characters without control characters, and must not override To, Cc, From, Bcc, Reply-To or Subject`;
   }
 }
