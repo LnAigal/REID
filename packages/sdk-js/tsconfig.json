@@ -10,6 +10,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "esModuleInterop": true,
+    "composite": true,
     "skipLibCheck": true
   },
   "include": ["src/**/*"]
