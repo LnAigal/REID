@@ -27,7 +27,7 @@ export interface EmailResponse {
 export interface APIError {
   success: false;
   message: string;
-  code: string;
+  code?: string;
   details?: Record<string, unknown>;
 }
 
@@ -38,7 +38,7 @@ class REIDError extends Error {
   constructor(error: APIError) {
     super(error.message);
     this.name = "REIDError";
-    this.code = error.code;
+    this.code = error.code ?? "REQUEST_FAILED";
     this.details = error.details;
   }
 }
@@ -99,13 +99,20 @@ export class REID {
     }
 
     const response = await fetch(url, config);
-    const data = (await response.json()) as Record<string, unknown>;
+    const data = (await response.json().catch(() => null)) as
+      | Record<string, unknown>
+      | null;
 
     if (!response.ok) {
-      throw new REIDError(data as unknown as APIError);
+      throw new REIDError(
+        (data ?? {
+          success: false,
+          message: `Request failed with status ${response.status}`,
+        }) as unknown as APIError,
+      );
     }
 
-    return (data.data ?? data) as T;
+    return (data?.data ?? data ?? {}) as T;
   }
 }
 
