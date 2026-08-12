@@ -94,7 +94,6 @@ export class AnalyticsService {
           bucket.sent += row.count;
           break;
         case 'DELIVERED':
-          bucket.sent += row.count;
           bucket.delivered += row.count;
           break;
         case 'FAILED':

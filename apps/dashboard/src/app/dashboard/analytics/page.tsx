@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
               />
               <Line
                 type="monotone"
-                dataKey={(data) => data.sent > 0 ? Math.round((data.delivered / data.sent) * 100) : 0}
+                dataKey={(data) => (data.sent + data.delivered) > 0 ? Math.round((data.delivered / (data.sent + data.delivered)) * 100) : 0}
                 stroke="#22c55e"
                 strokeWidth={2}
                 dot={{ fill: "#22c55e", strokeWidth: 2 }}
