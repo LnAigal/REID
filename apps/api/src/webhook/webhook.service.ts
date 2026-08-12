@@ -27,6 +27,22 @@ const STATUS_TIMESTAMP_FIELD: Record<string, keyof Pick<Prisma.EmailUncheckedUpd
   invalid: 'bouncedAt',
 };
 
+const STATUS_RANK: Record<EmailStatus, number> = {
+  QUEUED: 0,
+  PROCESSING: 1,
+  SENT: 2,
+  DELIVERED: 3,
+  OPENED: 4,
+  CLICKED: 5,
+  BOUNCED: 6,
+  FAILED: 6,
+};
+
+function statusAllows(current: EmailStatus | undefined, next: EmailStatus): boolean {
+  const currentRank = STATUS_RANK[current ?? 'QUEUED'];
+  return (STATUS_RANK[next] ?? 0) > currentRank;
+}
+
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
@@ -83,6 +99,13 @@ export class WebhookService {
     if (!status) {
       this.logger.warn(`Webhook from ${provider} for unknown event type "${event}"`);
       return { received: true, matched: false, event };
+    }
+
+    if (!statusAllows(email.status, status)) {
+      this.logger.log(
+        `Webhook from ${provider}: ignoring "${event}" — email ${email.id} is already ${email.status}`,
+      );
+      return { received: true, matched: true, event };
     }
 
     const updateData: Prisma.EmailUpdateInput = { status };

@@ -80,6 +80,50 @@ describe('WebhookService', () => {
       );
     });
 
+    it('ignores events that would regress a delivered email to opened', async () => {
+      prisma.email.findFirst.mockResolvedValue({ id: 'email1', status: 'OPENED' });
+
+      const result = await service.handleEvent('brevo', {
+        event: 'delivered',
+        'message-id': 'm1',
+      });
+
+      expect(result).toEqual({ received: true, matched: true, event: 'delivered' });
+      expect(prisma.email.update).not.toHaveBeenCalled();
+      expect(prisma.emailEvent.create).not.toHaveBeenCalled();
+    });
+
+    it('does not resurrect a bounced email as delivered', async () => {
+      prisma.email.findFirst.mockResolvedValue({ id: 'email1', status: 'BOUNCED' });
+
+      await service.handleEvent('brevo', { event: 'delivered', 'message-id': 'm1' });
+
+      expect(prisma.email.update).not.toHaveBeenCalled();
+      expect(prisma.emailEvent.create).not.toHaveBeenCalled();
+    });
+
+    it('allows delivered after sent and opened after delivered', async () => {
+      prisma.email.findFirst.mockResolvedValue({ id: 'email1', status: 'SENT' });
+
+      await service.handleEvent('brevo', { event: 'delivered', 'message-id': 'm1' });
+
+      expect(prisma.email.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'DELIVERED' }),
+        }),
+      );
+
+      prisma.email.findFirst.mockResolvedValue({ id: 'email1', status: 'DELIVERED' });
+
+      await service.handleEvent('brevo', { event: 'opened', 'message-id': 'm1' });
+
+      expect(prisma.email.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'OPENED' }),
+        }),
+      );
+    });
+
     it('returns unmatched when the message id is unknown', async () => {
       prisma.email.findFirst.mockResolvedValue(null);
 
