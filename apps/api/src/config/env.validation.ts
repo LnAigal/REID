@@ -11,7 +11,12 @@ const envSchema = z
     CORS_ORIGIN: z.string().url(),
     API_PREFIX: z.string().optional(),
     API_PORT: z.coerce.number().int().positive().optional(),
-    TRUST_PROXY: z.enum(['true', 'false']).default('false'),
+    TRUST_PROXY: z
+      .string()
+      .default('false')
+      .refine((value) => value === 'false' || value === 'true' || /^\d+$/.test(value), {
+        message: 'TRUST_PROXY must be "false", "true", or a hop count like "1"',
+      }),
     BREVO_API_KEY: z.string().optional(),
     DEFAULT_MAIL_PROVIDER: z.enum(['brevo', 'custom_smtp']).default('brevo'),
     APP_NAME: z.string().optional(),

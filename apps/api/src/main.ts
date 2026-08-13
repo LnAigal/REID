@@ -14,7 +14,14 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(cookieParser());
-  app.set('trust proxy', process.env.TRUST_PROXY === 'true');
+  const trustProxyRaw = process.env.TRUST_PROXY ?? 'false';
+  const trustProxy =
+    trustProxyRaw === 'false'
+      ? false
+      : trustProxyRaw === 'true'
+        ? 1
+        : Number(trustProxyRaw);
+  app.set('trust proxy', trustProxy);
 
   const corsOrigin = process.env.CORS_ORIGIN;
   if (!corsOrigin) {
