@@ -37,6 +37,13 @@ const envSchema = z
         message: 'BREVO_API_KEY is required when DEFAULT_MAIL_PROVIDER is brevo',
       });
     }
+    if (env.NODE_ENV === 'production' && !env.WEBHOOK_SECRET) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['WEBHOOK_SECRET'],
+        message: 'WEBHOOK_SECRET is required when NODE_ENV is production',
+      });
+    }
   });
 
 export function validate(config: Record<string, unknown>) {
