@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { Prisma, EmailProvider } from '@repo/database';
+import { Prisma, EmailProvider, EmailStatus } from '@repo/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { SendMailOptions } from '../mail/mail-provider.interface';
@@ -120,16 +120,12 @@ export class EmailService {
 
   async getEmails(userId: string, page = 1, limit = 20, search?: string) {
     const skip = (page - 1) * limit;
-    const where: Prisma.EmailWhereInput = { userId };
 
     if (search) {
-      where.OR = [
-        { subject: { contains: search, mode: 'insensitive' } },
-        { from: { contains: search, mode: 'insensitive' } },
-        { to: { has: search } },
-      ];
+      return this.searchEmails(userId, search, skip, limit, page);
     }
 
+    const where: Prisma.EmailWhereInput = { userId };
     const [emails, total] = await Promise.all([
       this.prisma.email.findMany({
         where,
@@ -157,6 +153,60 @@ export class EmailService {
 
     return {
       data: emails,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  private async searchEmails(userId: string, search: string, skip: number, limit: number, page: number) {
+    const escaped = search.replace(/[\\%_]/g, (char) => `\\${char}`);
+    const pattern = `%${escaped}%`;
+    const conditions = Prisma.sql`
+      "user_id" = ${userId}
+      AND (subject ILIKE ${pattern}
+           OR "from" ILIKE ${pattern}
+           OR array_to_string(to, ',') ILIKE ${pattern})
+    `;
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{
+          id: string;
+          from: string;
+          to: string[];
+          cc: string[];
+          bcc: string[];
+          subject: string;
+          status: EmailStatus;
+          provider: EmailProvider;
+          latency: number | null;
+          errorMessage: string | null;
+          sentAt: Date | null;
+          deliveredAt: Date | null;
+          createdAt: Date;
+        }>
+      >`
+        SELECT id, "from", to, cc, bcc, subject, status, provider, latency,
+               "errorMessage", "sentAt", "deliveredAt", "createdAt"
+        FROM emails
+        WHERE ${conditions}
+        ORDER BY "createdAt" DESC
+        LIMIT ${limit} OFFSET ${skip}
+      `,
+      this.prisma.$queryRaw<Array<{ count: number }>>`
+        SELECT COUNT(*)::int AS count
+        FROM emails
+        WHERE ${conditions}
+      `,
+    ]);
+
+    const total = countRows[0]?.count ?? 0;
+    return {
+      data: rows,
       pagination: {
         page,
         limit,
