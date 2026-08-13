@@ -30,6 +30,13 @@ describe('SendEmailDto', () => {
     expect(errors.map((e) => e.property)).toContain('subject');
   });
 
+  it('rejects a subject containing control characters', async () => {
+    for (const subject of ['hello\r\nBcc: victim@example.com', 'line1\nline2', 'tab\there']) {
+      const errors = await errorsFor({ subject });
+      expect(errors.map((e) => e.property)).toContain('subject');
+    }
+  });
+
   it('rejects an email address longer than 254 characters', async () => {
     const errors = await errorsFor({ from: `${'a'.repeat(250)}@example.com` });
     expect(errors.map((e) => e.property)).toContain('from');
@@ -64,6 +71,13 @@ describe('SendEmailDto', () => {
   it('rejects header values containing control characters', async () => {
     for (const value of ['a\r\nBcc: victim@example.com', 'line1\nline2']) {
       const errors = await errorsFor({ headers: { 'X-Custom': value } });
+      expect(errors.map((e) => e.property)).toContain('headers');
+    }
+  });
+
+  it('rejects header keys containing control characters', async () => {
+    for (const key of ['X-Evil\r\nBcc: victim@example.com', 'X-\nLine']) {
+      const errors = await errorsFor({ headers: { [key]: 'value' } });
       expect(errors.map((e) => e.property)).toContain('headers');
     }
   });

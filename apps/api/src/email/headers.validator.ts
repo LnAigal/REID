@@ -13,6 +13,17 @@ function hasControlChars(value: string): boolean {
   return false;
 }
 
+@ValidatorConstraint({ name: 'noControlCharacters', async: false })
+export class NoControlCharacters implements ValidatorConstraintInterface {
+  validate(value: unknown): boolean {
+    return typeof value !== 'string' || !hasControlChars(value);
+  }
+
+  defaultMessage(_args: ValidationArguments): string {
+    return 'must not contain control characters';
+  }
+}
+
 @ValidatorConstraint({ name: 'validHeaders', async: false })
 export class ValidHeaders implements ValidatorConstraintInterface {
   validate(value: unknown): boolean {
@@ -22,6 +33,7 @@ export class ValidHeaders implements ValidatorConstraintInterface {
     return entries.every(
       ([key, val]) =>
         key.length <= MAX_HEADER_KEY_LENGTH &&
+        !hasControlChars(key) &&
         !BLOCKED_HEADERS.has(key.toLowerCase()) &&
         typeof val === 'string' &&
         val.length <= MAX_HEADER_VALUE_LENGTH &&

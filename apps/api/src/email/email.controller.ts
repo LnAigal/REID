@@ -7,7 +7,7 @@ import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { Type } from 'class-transformer';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, ArrayMaxSize, IsInt, Min, Max, Validate } from 'class-validator';
-import { ValidHeaders } from './headers.validator';
+import { ValidHeaders, NoControlCharacters } from './headers.validator';
 
 export class SendEmailDto {
   @IsEmail()
@@ -42,6 +42,7 @@ export class SendEmailDto {
 
   @IsString()
   @MaxLength(998)
+  @Validate(NoControlCharacters)
   subject: string;
 
   @IsOptional()
