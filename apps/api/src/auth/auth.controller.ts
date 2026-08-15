@@ -97,12 +97,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Create a new account' })
   @ApiResponse({ status: 201, description: 'Account created successfully' })
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
-    const result = await this.authService.signup(dto.email, dto.name, dto.password);
-    if (result.token) {
-      this.authService.setAuthCookie(res, result.token);
+    const { token, ...data } = await this.authService.signup(dto.email, dto.name, dto.password);
+    if (token) {
+      this.authService.setAuthCookie(res, token);
       setCsrfCookie(res, this.csrfService.generateToken());
     }
-    return { success: true, data: result };
+    return { success: true, data };
   }
 
   @Post('login')
@@ -111,10 +111,10 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Signed in successfully' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const result = await this.authService.login(dto.email, dto.password);
-    this.authService.setAuthCookie(res, result.token);
+    const { token, ...data } = await this.authService.login(dto.email, dto.password);
+    this.authService.setAuthCookie(res, token);
     setCsrfCookie(res, this.csrfService.generateToken());
-    return { success: true, data: result };
+    return { success: true, data };
   }
 
   @Post('logout')
