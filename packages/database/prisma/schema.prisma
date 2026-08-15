@@ -62,7 +62,6 @@ model User {
   domains    Domain[]
   emails     Email[]
   templates  Template[]
-  auditLogs  AuditLog[]
 
   @@map("users")
 }
@@ -200,23 +199,4 @@ model Template {
 
   @@index([userId])
   @@map("templates")
-}
-
-model AuditLog {
-  id        String   @id @default(cuid())
-  action    String
-  resource  String
-  resourceId String?
-  details   Json?
-  ipAddress String?
-  userAgent String?
-  userId    String
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
-  @@map("audit_logs")
 }
