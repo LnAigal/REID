@@ -25,7 +25,9 @@ const SANITIZE_OPTIONS: sanitize.IOptions = {
 
 export function sanitizeHtml(html: string): string {
   return sanitize(html, SANITIZE_OPTIONS);
-}export function sanitizeOptionalHtml(html: string | undefined | null): string | undefined | null {
+}
+
+export function sanitizeOptionalHtml(html: string | undefined | null): string | undefined | null {
   if (!html) return html;
   return sanitizeHtml(html);
 }

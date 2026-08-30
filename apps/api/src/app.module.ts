@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { createHash } from 'crypto';
+import { Request } from 'express';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { CsrfModule } from './auth/csrf.module';
@@ -15,7 +16,7 @@ import { MailModule } from './mail/mail.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { validate } from './config/env.validation';
 
-const trackByApiKeyOrIp = (req: Record<string, any>): string => {
+const trackByApiKeyOrIp = (req: Request): string => {
   const authHeader = req.headers?.authorization as string | undefined;
   if (authHeader?.startsWith('Bearer reid_')) {
     return `apikey:${createHash('sha256').update(authHeader).digest('hex')}`;
