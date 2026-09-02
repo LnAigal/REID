@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  transpilePackages: ["@repo/shared", "@repo/ui"],
+  transpilePackages: ["@repo/shared"],
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },

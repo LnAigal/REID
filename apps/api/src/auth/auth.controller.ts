@@ -9,6 +9,17 @@ import { Request, Response } from 'express';
 import { cookieDomain } from './cookie.utils';
 import { IsEmail, IsString, IsUrl, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
 
+function PasswordField() {
+  return function (target: object, propertyKey: string) {
+    IsString()(target, propertyKey);
+    MinLength(8)(target, propertyKey);
+    MaxLength(72)(target, propertyKey);
+    Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })(target, propertyKey);
+    Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })(target, propertyKey);
+    Matches(/[0-9]/, { message: 'Password must contain at least one number' })(target, propertyKey);
+  };
+}
+
 class SignupDto {
   @IsEmail()
   email: string;
@@ -18,12 +29,7 @@ class SignupDto {
   @MaxLength(100)
   name: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(72)
-  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-  @Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
-  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
+  @PasswordField()
   password: string;
 }
 
@@ -51,12 +57,7 @@ class ChangePasswordDto {
   @IsString()
   currentPassword: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(72)
-  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-  @Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
-  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
+  @PasswordField()
   newPassword: string;
 }
 
@@ -75,12 +76,7 @@ class ResetPasswordDto {
   @IsString()
   token: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(72)
-  @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-  @Matches(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
-  @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
+  @PasswordField()
   password: string;
 }
 

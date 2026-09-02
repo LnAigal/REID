@@ -39,12 +39,13 @@ export class CustomSmtpProvider implements MailProvider {
         messageId: info.messageId,
         provider: this.name,
       };
-    } catch (error) {
-      this.logger.error(`Custom SMTP error: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Custom SMTP error: ${message}`);
       return {
         success: false,
         provider: this.name,
-        error: error.message,
+        error: message,
       };
     }
   }

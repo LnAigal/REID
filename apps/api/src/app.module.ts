@@ -16,12 +16,13 @@ import { MailModule } from './mail/mail.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { validate } from './config/env.validation';
 
-const trackByApiKeyOrIp = (req: Request): string => {
-  const authHeader = req.headers?.authorization as string | undefined;
+const trackByApiKeyOrIp = (req: Record<string, any>): string => {
+  const expressReq = req as Request;
+  const authHeader = expressReq.headers?.authorization as string | undefined;
   if (authHeader?.startsWith('Bearer reid_')) {
     return `apikey:${createHash('sha256').update(authHeader).digest('hex')}`;
   }
-  return `ip:${req.ip ?? req.socket?.remoteAddress ?? 'unknown'}`;
+  return `ip:${expressReq.ip ?? expressReq.socket?.remoteAddress ?? 'unknown'}`;
 };
 
 @Module({

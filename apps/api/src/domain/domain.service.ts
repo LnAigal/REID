@@ -100,8 +100,8 @@ export class DomainService {
     try {
       const records = await dns.promises.resolveTxt(domain);
       return records.some(record => record.join('').includes(token));
-    } catch (error) {
-      this.logger.warn(`DNS lookup failed for ${domain}: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.warn(`DNS lookup failed for ${domain}: ${(error as Error).message}`);
       return false;
     }
   }

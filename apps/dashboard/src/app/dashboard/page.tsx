@@ -32,11 +32,26 @@ export default function DashboardOverview() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getEmailStats().then((r) => setStats(r.data)).catch(() => setError("Failed to load dashboard data"));
-    api.getChartData(7).then((r) => setChartData(r.data)).catch(() => {});
-    api.getEmails(1, 5).then((r) => setRecentEmails(r.data)).catch(() => {});
-    api.getDomains().then((r) => setDomains(r.data)).catch(() => {});
-    api.getApiKeys().then((r) => setApiKeys(r.data)).catch(() => {});
+    const load = async () => {
+      try {
+        const [statsRes, chartRes, emailsRes, domainsRes, keysRes] = await Promise.allSettled([
+          api.getEmailStats(),
+          api.getChartData(7),
+          api.getEmails(1, 5),
+          api.getDomains(),
+          api.getApiKeys(),
+        ]);
+        if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
+        else setError("Failed to load dashboard stats");
+        if (chartRes.status === "fulfilled") setChartData(chartRes.value.data);
+        if (emailsRes.status === "fulfilled") setRecentEmails(emailsRes.value.data);
+        if (domainsRes.status === "fulfilled") setDomains(domainsRes.value.data);
+        if (keysRes.status === "fulfilled") setApiKeys(keysRes.value.data);
+      } catch {
+        setError("Failed to load dashboard data");
+      }
+    };
+    load();
   }, []);
 
   const overviewStats = [

@@ -52,12 +52,13 @@ export class BrevoProvider implements MailProvider {
         messageId: result.messageId,
         provider: this.name,
       };
-    } catch (error) {
-      this.logger.error(`Brevo send error: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Brevo send error: ${message}`);
       return {
         success: false,
         provider: this.name,
-        error: error.message,
+        error: message,
       };
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Mail, Search } from "lucide-react";
 import { api } from "../../../lib/api";
 
@@ -28,13 +28,20 @@ export default function EmailsPage() {
   const [search, setSearch] = useState("");
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    api.getEmails(1, 50, search || undefined)
-      .then((r) => setEmails(r.data))
-      .catch(() => setEmails([]))
-      .finally(() => setLoading(false));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setLoading(true);
+      api.getEmails(1, 50, search || undefined)
+        .then((r) => setEmails(r.data))
+        .catch(() => setEmails([]))
+        .finally(() => setLoading(false));
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [search]);
 
   return (

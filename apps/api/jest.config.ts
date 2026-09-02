@@ -14,9 +14,6 @@ const config: Config = {
   collectCoverageFrom: ['**/*.ts', '!main.ts', '!**/*.module.ts', '!**/*.dto.ts', '!**/*.guard.ts', '!**/*.strategy.ts'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
-  moduleNameMapper: {
-    '^@repo/shared$': '<rootDir>/../../packages/shared/src',
-  },
 };
 
 export default config;
