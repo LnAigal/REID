@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, ArrowRight, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "1") {
+      setSuccess("Account created! Please check your email to verify, then sign in.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +67,11 @@ export default function LoginPage() {
           {error && (
             <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
               {error}
+            </div>
+          )}
+          {success && (
+            <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
+              {success}
             </div>
           )}
 
@@ -116,5 +129,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

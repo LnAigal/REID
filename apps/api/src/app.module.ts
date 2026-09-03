@@ -16,8 +16,8 @@ import { MailModule } from './mail/mail.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { validate } from './config/env.validation';
 
-const trackByApiKeyOrIp = (req: Record<string, any>): string => {
-  const expressReq = req as Request;
+const trackByApiKeyOrIp = (req: Record<string, unknown>): string => {
+  const expressReq = req as unknown as Request;
   const authHeader = expressReq.headers?.authorization as string | undefined;
   if (authHeader?.startsWith('Bearer reid_')) {
     return `apikey:${createHash('sha256').update(authHeader).digest('hex')}`;

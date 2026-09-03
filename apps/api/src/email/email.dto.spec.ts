@@ -6,6 +6,7 @@ const base = {
   from: 'sender@example.com',
   to: ['recipient@example.com'],
   subject: 'Hello',
+  text: 'Hello',
 };
 
 describe('SendEmailDto', () => {
@@ -80,5 +81,25 @@ describe('SendEmailDto', () => {
       const errors = await errorsFor({ headers: { [key]: 'value' } });
       expect(errors.map((e) => e.property)).toContain('headers');
     }
+  });
+
+  it('rejects emails with neither html nor text', async () => {
+    const errors = await errorsFor({ html: undefined, text: undefined });
+    expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it('accepts emails with only html', async () => {
+    const errors = await errorsFor({ html: '<p>Hello</p>' });
+    expect(errors).toHaveLength(0);
+  });
+
+  it('accepts emails with only text', async () => {
+    const errors = await errorsFor({ text: 'Hello' });
+    expect(errors).toHaveLength(0);
+  });
+
+  it('accepts emails with both html and text', async () => {
+    const errors = await errorsFor({ html: '<p>Hello</p>', text: 'Hello' });
+    expect(errors).toHaveLength(0);
   });
 });

@@ -1,5 +1,17 @@
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 
+@ValidatorConstraint({ name: 'hasEmailContent', async: false })
+export class HasEmailContent implements ValidatorConstraintInterface {
+  validate(_value: unknown, args: ValidationArguments): boolean {
+    const obj = args.object as Record<string, unknown>;
+    return typeof obj.html === 'string' || typeof obj.text === 'string';
+  }
+
+  defaultMessage(_args: ValidationArguments): string {
+    return 'at least one of html or text must be provided';
+  }
+}
+
 const MAX_HEADERS = 20;
 const MAX_HEADER_KEY_LENGTH = 50;
 const MAX_HEADER_VALUE_LENGTH = 500;
