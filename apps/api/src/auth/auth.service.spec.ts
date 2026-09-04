@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../mail/mail.service';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
 describe('AuthService', () => {
@@ -49,13 +49,10 @@ describe('AuthService', () => {
       expect(result.token).toBe('mock-token');
     });
 
-    it('should not reveal whether the email is already registered', async () => {
+    it('should throw ConflictException when email is already registered', async () => {
       prisma.user.findUnique.mockResolvedValue({ id: '1', email: 'test@test.com' });
 
-      const result = await service.signup('test@test.com', 'Test', 'Password1');
-
-      expect(result.user).toBeNull();
-      expect(result.token).toBeNull();
+      await expect(service.signup('test@test.com', 'Test', 'Password1')).rejects.toThrow(ConflictException);
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
   });

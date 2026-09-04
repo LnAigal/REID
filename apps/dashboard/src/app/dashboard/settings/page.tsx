@@ -29,7 +29,7 @@ export default function SettingsPage() {
       setProfile((prev) => prev ? { ...prev, name } : prev);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to update profile";
-      alert(message);
+      console.error(message);
     } finally {
       setSaving(false);
     }
@@ -37,7 +37,7 @@ export default function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+      console.error("Passwords do not match");
       return;
     }
     setSaving(true);
@@ -46,10 +46,10 @@ export default function SettingsPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      alert("Password updated successfully");
+      console.log("Password updated successfully");
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to change password";
-      alert(message);
+      console.error(message);
     } finally {
       setSaving(false);
     }

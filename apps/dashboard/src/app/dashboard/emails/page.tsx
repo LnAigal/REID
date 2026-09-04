@@ -89,7 +89,7 @@ export default function EmailsPage() {
                 </tr>
               ) : (
                 emails.map((email) => (
-                  <tr key={email.id} className="hover:bg-white/5 transition-colors cursor-pointer">
+                  <tr key={email.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-zinc-500" />

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,8 +29,7 @@ export class AuthService {
   async signup(email: string, name: string, password: string) {
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
-      // Do not reveal whether the email is already registered.
-      return { user: null, token: null };
+      throw new ConflictException('An account with this email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -288,9 +287,10 @@ export class AuthService {
 
   setAuthCookie(res: Response, token: string) {
     const domain = cookieDomain();
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       ...(domain ? { domain } : {}),
@@ -299,9 +299,10 @@ export class AuthService {
 
   clearAuthCookie(res: Response) {
     const domain = cookieDomain();
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       ...(domain ? { domain } : {}),
     });

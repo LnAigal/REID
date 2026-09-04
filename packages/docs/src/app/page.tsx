@@ -198,7 +198,7 @@ console.log(email.id); // "reid_abc123"`}
         </section>
 
         <footer className="border-t border-white/10 pt-8 text-center text-sm text-zinc-500">
-          <p>© 2025 REID. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} REID. All rights reserved.</p>
         </footer>
       </div>
     </div>

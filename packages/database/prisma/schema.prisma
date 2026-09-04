@@ -23,6 +23,12 @@ enum DomainStatus {
   FAILED
 }
 
+enum DomainRecordStatus {
+  pending
+  verified
+  failed
+}
+
 enum EmailStatus {
   QUEUED
   PROCESSING
@@ -115,10 +121,10 @@ model DomainRecord {
   type     String
   name     String
   value    String
-  status   String   @default("pending")
+  status   DomainRecordStatus @default(pending)
   domainId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 

@@ -36,7 +36,7 @@ export default function TemplatesPage() {
       setShowAddModal(false);
       fetchTemplates();
     } catch {
-      alert("Failed to create template");
+      console.error("Failed to create template");
     }
   };
 
@@ -46,7 +46,7 @@ export default function TemplatesPage() {
       await api.deleteTemplate(id);
       fetchTemplates();
     } catch {
-      alert("Failed to delete template");
+      console.error("Failed to delete template");
     }
   };
 

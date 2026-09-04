@@ -241,7 +241,7 @@ await reid.emails.send({
               <a href="#" className="hover:text-white transition-colors">GitHub</a>
               <a href="#" className="hover:text-white transition-colors">Twitter</a>
             </div>
-            <p className="text-sm text-zinc-500">© 2025 REID. All rights reserved.</p>
+            <p className="text-sm text-zinc-500">© {new Date().getFullYear()} REID. All rights reserved.</p>
           </div>
         </div>
       </footer>

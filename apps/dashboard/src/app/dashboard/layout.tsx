@@ -57,7 +57,9 @@ export default function DashboardLayout({
 
         <nav className="flex flex-col gap-1 p-4">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}

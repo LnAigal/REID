@@ -1,8 +1,3 @@
-export interface REIDConfig {
-  apiKey: string;
-  baseUrl?: string;
-}
-
 export interface SendEmailOptions {
   from: string;
   to: string[];
@@ -31,7 +26,7 @@ export interface APIError {
   details?: Record<string, unknown>;
 }
 
-class REIDError extends Error {
+export class REIDError extends Error {
   code: string;
   details?: Record<string, unknown>;
 
@@ -43,7 +38,26 @@ class REIDError extends Error {
   }
 }
 
-export class REID {
+export interface DomainData {
+  id: string;
+  name: string;
+  status: string;
+  verificationToken?: string;
+  records: Array<{ type: string; name: string; value: string }>;
+  createdAt: string;
+}
+
+export interface ApiKeyData {
+  id: string;
+  name: string;
+  prefix: string;
+  type: string;
+  isActive: boolean;
+  lastUsed?: string;
+  createdAt: string;
+}
+
+class REID {
   private apiKey: string;
   private baseUrl: string;
 
@@ -64,21 +78,21 @@ export class REID {
 
   get domains() {
     return {
-      list: () => this.request("GET", "/domains"),
-      get: (id: string) => this.request("GET", `/domains/${id}`),
-      create: (data: { name: string }) => this.request("POST", "/domains", data),
-      verify: (id: string) => this.request("POST", `/domains/${id}/verify`),
-      delete: (id: string) => this.request("DELETE", `/domains/${id}`),
+      list: () => this.request<{ success: boolean; data: DomainData[] }>("GET", "/domains"),
+      get: (id: string) => this.request<{ success: boolean; data: DomainData }>("GET", `/domains/${id}`),
+      create: (data: { name: string }) => this.request<{ success: boolean; data: DomainData }>("POST", "/domains", data),
+      verify: (id: string) => this.request<{ success: boolean; data: DomainData }>("POST", `/domains/${id}/verify`),
+      delete: (id: string) => this.request<{ success: boolean; message: string }>("DELETE", `/domains/${id}`),
     };
   }
 
   get apiKeys() {
     return {
-      list: () => this.request("GET", "/api-keys"),
+      list: () => this.request<{ success: boolean; data: ApiKeyData[] }>("GET", "/api-keys"),
       create: (data: { name: string; type: "LIVE" | "TEST" }) =>
-        this.request("POST", "/api-keys", data),
-      delete: (id: string) => this.request("DELETE", `/api-keys/${id}`),
-      regenerate: (id: string) => this.request("POST", `/api-keys/${id}/regenerate`),
+        this.request<{ success: boolean; data: ApiKeyData & { key: string } }>("POST", "/api-keys", data),
+      delete: (id: string) => this.request<{ success: boolean; message: string }>("DELETE", `/api-keys/${id}`),
+      regenerate: (id: string) => this.request<{ success: boolean; data: ApiKeyData & { key: string } }>("POST", `/api-keys/${id}/regenerate`),
     };
   }
 

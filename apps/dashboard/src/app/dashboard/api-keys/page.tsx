@@ -38,7 +38,7 @@ export default function ApiKeysPage() {
       setNewKey({ name: "", type: "LIVE" });
       fetchKeys();
     } catch {
-      alert("Failed to create API key");
+      console.error("Failed to create API key");
     }
   };
 
@@ -48,7 +48,7 @@ export default function ApiKeysPage() {
       await api.deleteApiKey(id);
       fetchKeys();
     } catch {
-      alert("Failed to delete API key");
+      console.error("Failed to delete API key");
     }
   };
 
@@ -59,7 +59,7 @@ export default function ApiKeysPage() {
       setNewKeyValue(res.data.key);
       fetchKeys();
     } catch {
-      alert("Failed to regenerate API key");
+      console.error("Failed to regenerate API key");
     }
   };
 

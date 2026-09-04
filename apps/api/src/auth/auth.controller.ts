@@ -1,5 +1,6 @@
 import { Controller, Post, Get, Body, Req, Res, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CsrfGuard, setCsrfCookie } from './csrf.guard';
@@ -74,6 +75,7 @@ class VerifyEmailDto {
 
 class ResetPasswordDto {
   @IsString()
+  @MinLength(1)
   token: string;
 
   @PasswordField()
@@ -86,6 +88,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private csrfService: CsrfService,
+    private config: ConfigService,
   ) {}
 
   @Post('signup')
@@ -94,10 +97,8 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Account created successfully' })
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
     const { token, ...data } = await this.authService.signup(dto.email, dto.name, dto.password);
-    if (token) {
-      this.authService.setAuthCookie(res, token);
-      setCsrfCookie(res, this.csrfService.generateToken());
-    }
+    this.authService.setAuthCookie(res, token);
+    setCsrfCookie(res, this.csrfService.generateToken(), this.config);
     return { success: true, data };
   }
 
@@ -109,7 +110,7 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const { token, ...data } = await this.authService.login(dto.email, dto.password);
     this.authService.setAuthCookie(res, token);
-    setCsrfCookie(res, this.csrfService.generateToken());
+    setCsrfCookie(res, this.csrfService.generateToken(), this.config);
     return { success: true, data };
   }
 
@@ -119,10 +120,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign out' })
   async logout(@Res({ passthrough: true }) res: Response) {
     const domain = cookieDomain();
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     this.authService.clearAuthCookie(res);
     res.clearCookie('csrf_token', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'strict',
       ...(domain ? { domain } : {}),
     });

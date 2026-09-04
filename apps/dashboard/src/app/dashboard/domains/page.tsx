@@ -42,7 +42,7 @@ export default function DomainsPage() {
       setShowAddModal(false);
       fetchDomains();
     } catch {
-      alert("Failed to add domain");
+      console.error("Failed to add domain");
     }
   };
 
@@ -51,7 +51,7 @@ export default function DomainsPage() {
       await api.verifyDomain(id);
       fetchDomains();
     } catch {
-      alert("Verification failed");
+      console.error("Verification failed");
     }
   };
 
@@ -61,7 +61,7 @@ export default function DomainsPage() {
       await api.deleteDomain(id);
       fetchDomains();
     } catch {
-      alert("Failed to delete domain");
+      console.error("Failed to delete domain");
     }
   };
 

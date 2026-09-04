@@ -8,6 +8,10 @@ function makeCsrfService(secret = 'test-csrf-secret-that-is-at-least-32-chars-lo
   return new CsrfService(config);
 }
 
+function makeConfigService() {
+  return { get: jest.fn().mockReturnValue('development') } as never;
+}
+
 describe('CsrfGuard', () => {
   const makeContext = (
     method: string,
@@ -18,7 +22,7 @@ describe('CsrfGuard', () => {
     const context = {
       switchToHttp: () => ({ getRequest: () => request }),
     } as unknown as ExecutionContext;
-    return { guard: new CsrfGuard(makeCsrfService()), context };
+    return { guard: new CsrfGuard(makeCsrfService(), makeConfigService()), context };
   };
 
   it('allows safe methods without a token', () => {
@@ -91,7 +95,7 @@ describe('setCsrfCookie', () => {
   it('sets the csrf_token cookie to the provided value', () => {
     const cookie = jest.fn();
     const res = { cookie } as never;
-    setCsrfCookie(res, 'token.signature');
+    setCsrfCookie(res, 'token.signature', makeConfigService());
     expect(cookie).toHaveBeenCalledWith(
       'csrf_token',
       'token.signature',
@@ -106,7 +110,7 @@ describe('setCsrfCookie', () => {
     try {
       const cookie = jest.fn();
       const res = { cookie } as never;
-      setCsrfCookie(res, 'token.signature');
+      setCsrfCookie(res, 'token.signature', makeConfigService());
       expect(cookie).toHaveBeenCalledWith(
         'csrf_token',
         'token.signature',
@@ -124,7 +128,7 @@ describe('setCsrfCookie', () => {
     try {
       const cookie = jest.fn();
       const res = { cookie } as never;
-      setCsrfCookie(res, 'token.signature');
+      setCsrfCookie(res, 'token.signature', makeConfigService());
       const options = cookie.mock.calls[0][2] as Record<string, unknown>;
       expect(options.domain).toBeUndefined();
     } finally {

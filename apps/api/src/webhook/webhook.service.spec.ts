@@ -144,17 +144,15 @@ describe('WebhookService', () => {
     });
 
     it('rejects unsigned webhooks in production even without a configured secret', () => {
-      const previousEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
-      config.get.mockReturnValue(undefined);
+      config.get.mockImplementation((key: string, fallback?: string) => {
+        if (key === 'WEBHOOK_SECRET') return undefined;
+        if (key === 'NODE_ENV') return 'production';
+        return fallback;
+      });
 
-      try {
-        expect(() =>
-          service.verifySignature({ headers: {} } as never, 'brevo'),
-        ).toThrow(UnauthorizedException);
-      } finally {
-        process.env.NODE_ENV = previousEnv;
-      }
+      expect(() =>
+        service.verifySignature({ headers: {} } as never, 'brevo'),
+      ).toThrow(UnauthorizedException);
     });
 
     it('rejects a request with a bad signature', () => {
