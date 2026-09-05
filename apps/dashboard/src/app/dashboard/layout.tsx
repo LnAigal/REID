@@ -81,7 +81,11 @@ export default function DashboardLayout({
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
           <button
             onClick={async () => {
-              await api.logout();
+              try {
+                await api.logout();
+              } catch {
+                // continue to redirect even if the call fails
+              }
               window.location.href = "/login";
             }}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all w-full"

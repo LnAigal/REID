@@ -31,11 +31,7 @@ export default function SignupPage() {
         return;
       }
 
-      if (!data.data?.user) {
-        router.push("/login?registered=1");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     } catch {
       setError("Network error. Please try again.");
     } finally {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Mail, Globe, Key, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../../lib/api";
@@ -29,17 +30,19 @@ export default function DashboardOverview() {
   const [recentEmails, setRecentEmails] = useState<RecentEmail[]>([]);
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, chartRes, emailsRes, domainsRes, keysRes] = await Promise.allSettled([
+        const [statsRes, chartRes, emailsRes, domainsRes, keysRes, profileRes] = await Promise.allSettled([
           api.getEmailStats(),
           api.getChartData(7),
           api.getEmails(1, 5),
           api.getDomains(),
           api.getApiKeys(),
+          api.getProfile(),
         ]);
         if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
         else setError("Failed to load dashboard stats");
@@ -47,6 +50,7 @@ export default function DashboardOverview() {
         if (emailsRes.status === "fulfilled") setRecentEmails(emailsRes.value.data);
         if (domainsRes.status === "fulfilled") setDomains(domainsRes.value.data);
         if (keysRes.status === "fulfilled") setApiKeys(keysRes.value.data);
+        if (profileRes.status === "fulfilled") setEmailVerified(profileRes.value.data.emailVerified === true);
       } catch {
         setError("Failed to load dashboard data");
       }
@@ -67,6 +71,25 @@ export default function DashboardOverview() {
         <h1 className="text-2xl font-bold">Overview</h1>
         <p className="text-zinc-400 text-sm mt-1">Welcome back. Here&apos;s your email infrastructure at a glance.</p>
       </div>
+
+      {emailVerified === false && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-amber-400">Verify your email address</p>
+              <p className="text-sm text-zinc-400">
+                You must verify your email before you can send emails.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/settings"
+              className="shrink-0 rounded-lg bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-500/30 transition-all"
+            >
+              Verify now
+            </Link>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">

@@ -22,7 +22,9 @@ export class AnalyticsService {
     ] = await Promise.all([
       this.prisma.email.count({ where: { userId, createdAt: { gte: thirtyDaysAgo } } }),
       this.prisma.email.count({ where: { userId, status: 'SENT', createdAt: { gte: thirtyDaysAgo } } }),
-      this.prisma.email.count({ where: { userId, status: 'DELIVERED', createdAt: { gte: thirtyDaysAgo } } }),
+      this.prisma.email.count({
+        where: { userId, status: { in: ['DELIVERED', 'OPENED', 'CLICKED'] }, createdAt: { gte: thirtyDaysAgo } },
+      }),
       this.prisma.email.count({ where: { userId, status: 'FAILED', createdAt: { gte: thirtyDaysAgo } } }),
       this.prisma.email.count({ where: { userId, status: 'BOUNCED', createdAt: { gte: thirtyDaysAgo } } }),
       this.prisma.domain.count({ where: { userId } }),
@@ -69,7 +71,8 @@ export class AnalyticsService {
 
   async getChartData(userId: string, days = 30) {
     const now = new Date();
-    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    startDate.setUTCDate(startDate.getUTCDate() - (days - 1));
 
     const rows = await this.prisma.$queryRaw<
       Array<{ date: string; status: string; count: number }>

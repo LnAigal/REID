@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, ArrowRight, Loader2 } from "lucide-react";
 
@@ -10,14 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
-
-  useEffect(() => {
-    if (searchParams.get("registered") === "1") {
-      setSuccess("Account created! Please check your email to verify, then sign in.");
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +32,9 @@ function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      const redirect = searchParams.get("redirect");
+      const target = redirect && redirect.startsWith("/") ? redirect : "/dashboard";
+      router.push(target);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -67,11 +62,6 @@ function LoginForm() {
           {error && (
             <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
               {error}
-            </div>
-          )}
-          {success && (
-            <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
-              {success}
             </div>
           )}
 

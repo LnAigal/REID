@@ -38,6 +38,13 @@ describe('SendEmailDto', () => {
     }
   });
 
+  it('rejects a subject containing Unicode line separators', async () => {
+    for (const subject of ['line1\u0085Bcc: victim@example.com', 'line1\u2028Bcc: victim@example.com', 'line1\u2029Bcc: victim@example.com']) {
+      const errors = await errorsFor({ subject });
+      expect(errors.map((e) => e.property)).toContain('subject');
+    }
+  });
+
   it('rejects an email address longer than 254 characters', async () => {
     const errors = await errorsFor({ from: `${'a'.repeat(250)}@example.com` });
     expect(errors.map((e) => e.property)).toContain('from');
@@ -71,6 +78,13 @@ describe('SendEmailDto', () => {
 
   it('rejects header values containing control characters', async () => {
     for (const value of ['a\r\nBcc: victim@example.com', 'line1\nline2']) {
+      const errors = await errorsFor({ headers: { 'X-Custom': value } });
+      expect(errors.map((e) => e.property)).toContain('headers');
+    }
+  });
+
+  it('rejects header values containing Unicode line separators', async () => {
+    for (const value of ['line1\u0085Bcc: victim@example.com', 'line1\u2028X-Evil: 1', 'line1\u2029X-Evil: 2']) {
       const errors = await errorsFor({ headers: { 'X-Custom': value } });
       expect(errors.map((e) => e.property)).toContain('headers');
     }

@@ -54,7 +54,9 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
       document.cookie = "token=; Max-Age=0; path=/";
       document.cookie = "csrf_token=; Max-Age=0; path=/";
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        const currentPath = window.location.pathname;
+        const redirect = currentPath && currentPath !== "/login";
+        window.location.href = redirect && currentPath.startsWith("/") ? `/login?redirect=${encodeURIComponent(currentPath)}` : "/login";
       }
       throw new Error("Session expired, redirecting to login");
     }
@@ -80,13 +82,13 @@ export const api = {
   logout: () =>
     request<{ success: boolean; message: string }>("/auth/logout", { method: "POST" }),
   sendVerification: () =>
-    request<{ success: boolean; data: { message: string } }>("/auth/send-verification", { method: "POST" }),
+    request<{ message: string }>("/auth/send-verification", { method: "POST" }),
   verifyEmail: (token: string) =>
-    request<{ success: boolean; data: { message: string } }>("/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
+    request<{ message: string }>("/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
   forgotPassword: (email: string) =>
-    request<{ success: boolean; data: { message: string } }>("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
+    request<{ message: string }>("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
   resetPassword: (token: string, password: string) =>
-    request<{ success: boolean; data: { message: string } }>("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, password }) }),
+    request<{ message: string }>("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, password }) }),
 
   // Emails
   getEmails: (page = 1, limit = 20, search?: string) =>
@@ -102,7 +104,7 @@ export const api = {
   verifyDomain: (id: string) =>
     request<{ success: boolean; data: DomainData }>(`/domains/${id}/verify`, { method: "POST" }),
   deleteDomain: (id: string) =>
-    request<{ success: boolean; message: string }>(`/domains/${id}`, { method: "DELETE" }),
+    request<{ message: string }>(`/domains/${id}`, { method: "DELETE" }),
 
   // API Keys
   getApiKeys: () =>
@@ -110,7 +112,7 @@ export const api = {
   createApiKey: (name: string, type: "LIVE" | "TEST") =>
     request<{ success: boolean; data: ApiKeyData & { key: string } }>("/api-keys", { method: "POST", body: JSON.stringify({ name, type }) }),
   deleteApiKey: (id: string) =>
-    request<{ success: boolean; message: string }>(`/api-keys/${id}`, { method: "DELETE" }),
+    request<{ message: string }>(`/api-keys/${id}`, { method: "DELETE" }),
   regenerateApiKey: (id: string) =>
     request<{ success: boolean; data: ApiKeyData & { key: string } }>(`/api-keys/${id}/regenerate`, { method: "POST" }),
 
@@ -126,5 +128,5 @@ export const api = {
   createTemplate: (data: { name: string; subject: string; html: string; text?: string }) =>
     request<{ success: boolean; data: TemplateData }>("/templates", { method: "POST", body: JSON.stringify(data) }),
   deleteTemplate: (id: string) =>
-    request<{ success: boolean; message: string }>(`/templates/${id}`, { method: "DELETE" }),
+    request<{ message: string }>(`/templates/${id}`, { method: "DELETE" }),
 };

@@ -169,7 +169,9 @@ export class EmailService {
       "user_id" = ${userId}
       AND (subject ILIKE ${pattern}
            OR "from" ILIKE ${pattern}
-           OR array_to_string(to, ',') ILIKE ${pattern})
+           OR array_to_string("to", ',') ILIKE ${pattern}
+           OR array_to_string(cc, ',') ILIKE ${pattern}
+           OR array_to_string(bcc, ',') ILIKE ${pattern})
     `;
 
     const [rows, countRows] = await Promise.all([
@@ -190,7 +192,7 @@ export class EmailService {
           createdAt: Date;
         }>
       >`
-        SELECT id, "from", to, cc, bcc, subject, status, provider, latency,
+        SELECT id, "from", "to", cc, bcc, subject, status, provider, latency,
                "errorMessage", "sentAt", "deliveredAt", "createdAt"
         FROM emails
         WHERE ${conditions}
@@ -233,7 +235,9 @@ export class EmailService {
     const [total, sent, delivered, failed, bounced] = await Promise.all([
       this.prisma.email.count({ where: { userId, createdAt: { gte: thirtyDaysAgo } } }),
       this.prisma.email.count({ where: { userId, status: 'SENT', createdAt: { gte: thirtyDaysAgo } } }),
-      this.prisma.email.count({ where: { userId, status: 'DELIVERED', createdAt: { gte: thirtyDaysAgo } } }),
+      this.prisma.email.count({
+        where: { userId, status: { in: ['DELIVERED', 'OPENED', 'CLICKED'] }, createdAt: { gte: thirtyDaysAgo } },
+      }),
       this.prisma.email.count({ where: { userId, status: 'FAILED', createdAt: { gte: thirtyDaysAgo } } }),
       this.prisma.email.count({ where: { userId, status: 'BOUNCED', createdAt: { gte: thirtyDaysAgo } } }),
     ]);

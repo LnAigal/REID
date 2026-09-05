@@ -60,7 +60,7 @@ export default function SettingsPage() {
     setVerificationMessage(null);
     try {
       const res = await api.sendVerification();
-      setVerificationMessage(res.data.message || "Verification email sent");
+      setVerificationMessage(res.message || "Verification email sent");
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to send verification email";
       setVerificationMessage(message);

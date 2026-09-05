@@ -21,6 +21,7 @@ function hasControlChars(value: string): boolean {
   for (const char of value) {
     const code = char.charCodeAt(0);
     if (code < 0x20 || code === 0x7f) return true;
+    if (code === 0x85 || code === 0x2028 || code === 0x2029) return true;
   }
   return false;
 }
