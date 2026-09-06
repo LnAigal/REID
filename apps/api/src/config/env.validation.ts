@@ -28,6 +28,18 @@ const envSchema = z
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
     WEBHOOK_SECRET: z.string().optional(),
+    ALLOW_UNSIGNED_WEBHOOKS: z
+      .enum(['true', 'false'])
+      .optional()
+      .superRefine((value, ctx) => {
+        if (value === 'true' && process.env.NODE_ENV === 'production') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ALLOW_UNSIGNED_WEBHOOKS'],
+            message: 'ALLOW_UNSIGNED_WEBHOOKS cannot be enabled when NODE_ENV is production',
+          });
+        }
+      }),
   })
   .superRefine((env, ctx) => {
     if (env.DEFAULT_MAIL_PROVIDER === 'brevo' && !env.BREVO_API_KEY) {

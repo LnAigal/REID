@@ -134,6 +134,7 @@ model DomainRecord {
 
 model Email {
   id          String        @id @default(cuid())
+  searchText  String?       @map("search_text")
   from        String
   to          String[]
   cc          String[]

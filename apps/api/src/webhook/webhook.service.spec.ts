@@ -135,18 +135,44 @@ describe('WebhookService', () => {
   });
 
   describe('verifySignature', () => {
-    it('accepts a request when no secret is configured', () => {
+    it('rejects a request with no secret and no explicit opt-in', () => {
       config.get.mockReturnValue(undefined);
+
+      expect(() =>
+        service.verifySignature({ headers: {} } as never, 'brevo'),
+      ).toThrow(UnauthorizedException);
+    });
+
+    it('accepts an unsigned request only when explicitly opted in outside production', () => {
+      config.get.mockImplementation((key: string, fallback?: string) => {
+        if (key === 'WEBHOOK_SECRET') return undefined;
+        if (key === 'NODE_ENV') return 'development';
+        if (key === 'ALLOW_UNSIGNED_WEBHOOKS') return 'true';
+        return fallback;
+      });
 
       expect(() =>
         service.verifySignature({ headers: {} } as never, 'brevo'),
       ).not.toThrow();
     });
 
-    it('rejects unsigned webhooks in production even without a configured secret', () => {
+    it('rejects an unsigned request when the opt-in is not set, even in development', () => {
+      config.get.mockImplementation((key: string, fallback?: string) => {
+        if (key === 'WEBHOOK_SECRET') return undefined;
+        if (key === 'NODE_ENV') return 'development';
+        return fallback;
+      });
+
+      expect(() =>
+        service.verifySignature({ headers: {} } as never, 'brevo'),
+      ).toThrow(UnauthorizedException);
+    });
+
+    it('rejects unsigned webhooks in production even with the opt-in enabled', () => {
       config.get.mockImplementation((key: string, fallback?: string) => {
         if (key === 'WEBHOOK_SECRET') return undefined;
         if (key === 'NODE_ENV') return 'production';
+        if (key === 'ALLOW_UNSIGNED_WEBHOOKS') return 'true';
         return fallback;
       });
 

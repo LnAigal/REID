@@ -279,10 +279,11 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  async validateToken(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user) throw new UnauthorizedException('User not found');
-    return user;
+  async logout(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { tokenVersion: { increment: 1 } },
+    });
   }
 
   setAuthCookie(res: Response, token: string) {

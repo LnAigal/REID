@@ -118,9 +118,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Sign out' })
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const domain = cookieDomain();
     const isProduction = this.config.get('NODE_ENV') === 'production';
+    await this.authService.logout(req.user!.id);
     this.authService.clearAuthCookie(res);
     res.clearCookie('csrf_token', {
       httpOnly: false,

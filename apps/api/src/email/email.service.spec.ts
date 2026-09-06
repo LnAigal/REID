@@ -79,7 +79,7 @@ describe('EmailService', () => {
       expect(conditions.values[1]).toBe('%50\\%\\_off%');
     });
 
-    it('quotes the reserved-ish recipient columns (to, cc, bcc) in the raw query', async () => {
+    it('quotes the reserved recipient columns in the select of the raw query', async () => {
       prisma.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([{ count: 0 }]);
 
       await service.getEmails('user1', 1, 20, 'recipient');
@@ -90,9 +90,8 @@ describe('EmailService', () => {
         .map((s, i) => s + (i < conditions.values.length ? String(conditions.values[i]) : ''))
         .join('');
       expect(select).toContain('SELECT id, "from", "to"');
-      expect(conditionsSql).toContain('array_to_string("to", \',\')');
-      expect(conditionsSql).toContain('array_to_string(cc, \',\')');
-      expect(conditionsSql).toContain('array_to_string(bcc, \',\')');
+      expect(conditionsSql).toContain('search_text ILIKE');
+      expect(conditionsSql).toContain('subject ILIKE');
     });
   });
 });

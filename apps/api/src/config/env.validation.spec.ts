@@ -22,4 +22,15 @@ describe('env validation', () => {
   it('does not require WEBHOOK_SECRET outside production', () => {
     expect(() => validate({ ...base, NODE_ENV: 'development' })).not.toThrow();
   });
+
+  it('rejects webhooks opt-in together with production NODE_ENV', () => {
+    process.env.NODE_ENV = 'production';
+    try {
+      expect(() =>
+        validate({ ...base, WEBHOOK_SECRET: 'secret', ALLOW_UNSIGNED_WEBHOOKS: 'true' }),
+      ).toThrow(/ALLOW_UNSIGNED_WEBHOOKS/);
+    } finally {
+      delete process.env.NODE_ENV;
+    }
+  });
 });

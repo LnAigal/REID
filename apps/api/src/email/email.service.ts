@@ -167,11 +167,8 @@ export class EmailService {
     const pattern = `%${escaped}%`;
     const conditions = Prisma.sql`
       "user_id" = ${userId}
-      AND (subject ILIKE ${pattern}
-           OR "from" ILIKE ${pattern}
-           OR array_to_string("to", ',') ILIKE ${pattern}
-           OR array_to_string(cc, ',') ILIKE ${pattern}
-           OR array_to_string(bcc, ',') ILIKE ${pattern})
+      AND (search_text ILIKE ${pattern}
+           OR subject ILIKE ${pattern})
     `;
 
     const [rows, countRows] = await Promise.all([

@@ -56,10 +56,14 @@ export class WebhookService {
     const secret = this.config.get('WEBHOOK_SECRET');
     if (!secret) {
       const nodeEnv = this.config.get('NODE_ENV', 'development');
-      if (nodeEnv === 'production') {
+      const allowUnsigned = this.config.get('ALLOW_UNSIGNED_WEBHOOKS', 'false') === 'true';
+      if (nodeEnv === 'production' || !allowUnsigned) {
         throw new UnauthorizedException('WEBHOOK_SECRET is not configured');
       }
-      this.logger.warn(`WEBHOOK_SECRET not set; accepting unsigned ${provider} webhook (development only)`);
+      this.logger.warn(
+        `WEBHOOK_SECRET not set; accepting unsigned ${provider} webhook. ` +
+          `Only allowed when ALLOW_UNSIGNED_WEBHOOKS=true and NODE_ENV != production.`,
+      );
       return;
     }
 
