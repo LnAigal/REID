@@ -89,19 +89,31 @@ export class EmailService {
       updateData.errorMessage = result.error ?? null;
     }
 
-    const [updatedEmail] = await this.prisma.$transaction([
-      this.prisma.email.update({
-        where: { id: email.id },
-        data: updateData,
-      }),
-      this.prisma.emailEvent.create({
-        data: {
-          type: result.success ? 'sent' : 'failed',
-          data: result as unknown as Prisma.InputJsonValue,
-          emailId: email.id,
-        },
-      }),
-    ]);
+    let updatedEmail: { id: string; from: string; to: string[]; subject: string; status: EmailStatus; createdAt: Date };
+    try {
+      [updatedEmail] = await this.prisma.$transaction([
+        this.prisma.email.update({
+          where: { id: email.id },
+          data: updateData,
+        }),
+        this.prisma.emailEvent.create({
+          data: {
+            type: result.success ? 'sent' : 'failed',
+            data: result as unknown as Prisma.InputJsonValue,
+            emailId: email.id,
+          },
+        }),
+      ]);
+    } catch (txError) {
+      this.logger.error(`Transaction failed for email ${email.id}: ${txError instanceof Error ? txError.message : 'unknown'}`);
+      if (result.success) {
+        await this.prisma.email.update({
+          where: { id: email.id },
+          data: { status: 'SENT', providerId: result.messageId, sentAt: new Date(), latency: Date.now() - latencyStartedAt },
+        });
+      }
+      throw new BadRequestException('Failed to record email status');
+    }
 
     if (!result.success) {
       this.logger.error(`Email send failed for ${email.id}: ${result.error}`);

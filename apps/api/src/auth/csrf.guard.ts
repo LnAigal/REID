@@ -45,6 +45,7 @@ export function setCsrfCookie(res: Response, raw: string, config: ConfigService)
     httpOnly: false,
     secure: isProduction,
     sameSite: 'strict',
+    path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     ...(domain ? { domain } : {}),
   });

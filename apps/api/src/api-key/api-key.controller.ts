@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, IsEnum, MinLength, MaxLength } from 'class-validator';
+import { IsCuidPipe } from '../utils/cuid.pipe';
 
 class CreateApiKeyDto {
   @IsString()
@@ -45,7 +46,7 @@ export class ApiKeyController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an API key' })
-  async remove(@Req() req: Request, @Param('id') id: string) {
+  async remove(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     return this.apiKeyService.remove(user.id, id);
   }
@@ -54,7 +55,7 @@ export class ApiKeyController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Regenerate an API key' })
-  async regenerate(@Req() req: Request, @Param('id') id: string) {
+  async regenerate(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     const result = await this.apiKeyService.regenerate(user.id, id);
     return { success: true, data: result };

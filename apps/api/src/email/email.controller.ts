@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { Type } from 'class-transformer';
 import { IsEmail, IsArray, IsOptional, IsString, IsObject, MaxLength, ArrayMinSize, ArrayMaxSize, IsInt, Min, Max, Validate } from 'class-validator';
 import { ValidHeaders, NoControlCharacters, HasEmailContent } from './headers.validator';
+import { IsCuidPipe } from '../utils/cuid.pipe';
 
 export class SendEmailDto {
   @IsEmail()
@@ -67,6 +68,7 @@ class ListEmailsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(10000)
   page?: number = 1;
 
   @IsOptional()
@@ -127,7 +129,7 @@ export class EmailController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get email details' })
-  async getOne(@Req() req: Request, @Param('id') id: string) {
+  async getOne(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     const result = await this.emailService.getEmailById(user.id, id);
     return { success: true, data: result };

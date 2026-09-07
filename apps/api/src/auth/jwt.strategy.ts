@@ -34,7 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    if (payload.tokenVersion !== undefined && payload.tokenVersion < user.tokenVersion) {
+    if (payload.tokenVersion === undefined || payload.tokenVersion < user.tokenVersion) {
       throw new UnauthorizedException('Token has been revoked');
     }
 

@@ -1,16 +1,16 @@
 import { Controller, Post, Param, Req, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { SkipThrottle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 
-@SkipThrottle()
 @ApiTags('webhooks')
 @Controller('webhooks')
 export class WebhookController {
   constructor(private webhookService: WebhookService) {}
 
   @Post(':provider')
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Receive delivery events from a mail provider' })
   @ApiParam({ name: 'provider', description: 'Mail provider name (e.g. brevo, custom_smtp)' })

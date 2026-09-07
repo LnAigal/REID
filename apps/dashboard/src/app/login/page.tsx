@@ -33,7 +33,10 @@ function LoginForm() {
       }
 
       const redirect = searchParams.get("redirect");
-      const target = redirect && redirect.startsWith("/") ? redirect : "/dashboard";
+      const target =
+        redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+          ? redirect
+          : "/dashboard";
       router.push(target);
     } catch {
       setError("Network error. Please try again.");

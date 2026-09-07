@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, MinLength, IsOptional, MaxLength } from 'class-validator';
+import { IsCuidPipe } from '../utils/cuid.pipe';
 
 class CreateTemplateDto {
   @IsString()
@@ -80,7 +81,7 @@ export class TemplateController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get template details' })
-  async getOne(@Req() req: Request, @Param('id') id: string) {
+  async getOne(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     const result = await this.templateService.findOne(user.id, id);
     return { success: true, data: result };
@@ -90,7 +91,7 @@ export class TemplateController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update template' })
-  async update(@Req() req: Request, @Param('id') id: string, @Body() dto: UpdateTemplateDto) {
+  async update(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string, @Body() dto: UpdateTemplateDto) {
     const user = req.user!;
     const result = await this.templateService.update(user.id, id, dto);
     return { success: true, data: result };
@@ -100,7 +101,7 @@ export class TemplateController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete template' })
-  async remove(@Req() req: Request, @Param('id') id: string) {
+  async remove(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     return this.templateService.remove(user.id, id);
   }

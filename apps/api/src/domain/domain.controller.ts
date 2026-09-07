@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CsrfGuard } from '../auth/csrf.guard';
 import { Request } from 'express';
 import { IsString, Matches } from 'class-validator';
+import { IsCuidPipe } from '../utils/cuid.pipe';
 
 class CreateDomainDto {
   @IsString()
@@ -41,7 +42,7 @@ export class DomainController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get domain details' })
-  async getOne(@Req() req: Request, @Param('id') id: string) {
+  async getOne(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     const result = await this.domainService.findOne(user.id, id);
     return { success: true, data: result };
@@ -51,7 +52,7 @@ export class DomainController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify domain' })
-  async verify(@Req() req: Request, @Param('id') id: string) {
+  async verify(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     const result = await this.domainService.verify(user.id, id);
     return { success: true, data: result };
@@ -61,7 +62,7 @@ export class DomainController {
   @UseGuards(JwtAuthGuard, CsrfGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete domain' })
-  async remove(@Req() req: Request, @Param('id') id: string) {
+  async remove(@Req() req: Request, @Param('id', new IsCuidPipe()) id: string) {
     const user = req.user!;
     return this.domainService.remove(user.id, id);
   }

@@ -39,6 +39,7 @@ class LoginDto {
   email: string;
 
   @IsString()
+  @MaxLength(72)
   password: string;
 }
 
@@ -56,6 +57,7 @@ class UpdateProfileDto {
 
 class ChangePasswordDto {
   @IsString()
+  @MaxLength(72)
   currentPassword: string;
 
   @PasswordField()

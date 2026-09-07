@@ -173,6 +173,8 @@ model Email {
   @@index([providerId])
   @@index([status])
   @@index([createdAt])
+  @@index([userId, status, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("emails")
 }
 
