@@ -8,8 +8,12 @@ function makeCsrfService(secret = 'test-csrf-secret-that-is-at-least-32-chars-lo
   return new CsrfService(config);
 }
 
-function makeConfigService() {
-  return { get: jest.fn().mockReturnValue('development') } as never;
+function makeConfigService(overrides: Record<string, string | undefined> = {}) {
+  return {
+    get: jest.fn((key: string) =>
+      key in overrides ? overrides[key] : key === 'COOKIE_DOMAIN' ? undefined : 'development',
+    ),
+  } as never;
 }
 
 describe('CsrfGuard', () => {
@@ -104,37 +108,21 @@ describe('setCsrfCookie', () => {
   });
 
   it('scopes the cookie to the shared parent domain when COOKIE_DOMAIN is set', () => {
-    const previousDomain = process.env.COOKIE_DOMAIN;
-    process.env.COOKIE_DOMAIN = '.reid.dev';
-
-    try {
-      const cookie = jest.fn();
-      const res = { cookie } as never;
-      setCsrfCookie(res, 'token.signature', makeConfigService());
-      expect(cookie).toHaveBeenCalledWith(
-        'csrf_token',
-        'token.signature',
-        expect.objectContaining({ domain: '.reid.dev' }),
-      );
-    } finally {
-      process.env.COOKIE_DOMAIN = previousDomain;
-    }
+    const cookie = jest.fn();
+    const res = { cookie } as never;
+    setCsrfCookie(res, 'token.signature', makeConfigService({ COOKIE_DOMAIN: '.reid.dev' }));
+    expect(cookie).toHaveBeenCalledWith(
+      'csrf_token',
+      'token.signature',
+      expect.objectContaining({ domain: '.reid.dev' }),
+    );
   });
 
   it('omits the Domain attribute when COOKIE_DOMAIN is unset', () => {
-    const previousDomain = process.env.COOKIE_DOMAIN;
-    delete process.env.COOKIE_DOMAIN;
-
-    try {
-      const cookie = jest.fn();
-      const res = { cookie } as never;
-      setCsrfCookie(res, 'token.signature', makeConfigService());
-      const options = cookie.mock.calls[0][2] as Record<string, unknown>;
-      expect(options.domain).toBeUndefined();
-    } finally {
-      if (previousDomain !== undefined) {
-        process.env.COOKIE_DOMAIN = previousDomain;
-      }
-    }
+    const cookie = jest.fn();
+    const res = { cookie } as never;
+    setCsrfCookie(res, 'token.signature', makeConfigService());
+    const options = cookie.mock.calls[0][2] as Record<string, unknown>;
+    expect(options.domain).toBeUndefined();
   });
 });

@@ -2,13 +2,15 @@ import { z } from 'zod';
 
 const envSchema = z
   .object({
-    DATABASE_URL: z.string().url().or(z.string().min(1)),
+    DATABASE_URL: z.string().startsWith('postgres://', 'DATABASE_URL must start with postgres:// or postgresql://').or(
+      z.string().startsWith('postgresql://', 'DATABASE_URL must start with postgres:// or postgresql://'),
+    ),
     JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for HMAC-SHA256 security'),
     CSRF_SECRET: z.string().min(32, 'CSRF_SECRET must be at least 32 characters for HMAC-SHA256 security'),
     COOKIE_DOMAIN: z.string().optional(),
     JWT_EXPIRATION: z.string().optional(),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-    CORS_ORIGIN: z.string().url(),
+    CORS_ORIGIN: z.string(),
     API_PREFIX: z.string().optional(),
     API_PORT: z.coerce.number().int().positive().optional(),
     TRUST_PROXY: z
@@ -20,7 +22,7 @@ const envSchema = z
     BREVO_API_KEY: z.string().optional(),
     DEFAULT_MAIL_PROVIDER: z.enum(['brevo', 'custom_smtp']).default('brevo'),
     APP_NAME: z.string().optional(),
-    APP_URL: z.string().url().optional(),
+    APP_URL: z.string().url(),
     VERIFICATION_FROM_EMAIL: z.string().email().optional(),
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().int().positive().optional(),

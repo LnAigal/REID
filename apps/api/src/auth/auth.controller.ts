@@ -121,7 +121,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Sign out' })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const domain = cookieDomain();
+    const domain = cookieDomain(this.config);
     const isProduction = this.config.get('NODE_ENV') === 'production';
     await this.authService.logout(req.user!.id);
     this.authService.clearAuthCookie(res);

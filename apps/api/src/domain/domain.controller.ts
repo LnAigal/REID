@@ -9,7 +9,7 @@ import { IsCuidPipe } from '../utils/cuid.pipe';
 
 class CreateDomainDto {
   @IsString()
-  @Matches(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/)
+  @Matches(/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/)
   name: string;
 }
 

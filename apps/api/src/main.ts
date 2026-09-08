@@ -27,8 +27,9 @@ async function bootstrap() {
   if (!corsOrigin) {
     throw new Error('CORS_ORIGIN environment variable is required');
   }
+  const origins = corsOrigin.split(',').map((o) => o.trim());
   app.enableCors({
-    origin: corsOrigin,
+    origin: origins.length === 1 ? origins[0] : origins,
     credentials: true,
   });
 

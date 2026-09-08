@@ -24,9 +24,9 @@ enum DomainStatus {
 }
 
 enum DomainRecordStatus {
-  pending
-  verified
-  failed
+  PENDING
+  VERIFIED
+  FAILED
 }
 
 enum EmailStatus {
@@ -98,10 +98,7 @@ model Domain {
   name           String       @unique
   status         DomainStatus @default(PENDING)
   verificationToken String
-  spfRecord      String?
-  dkimRecord     String?
   dkimSelector   String?
-  dmarcRecord    String?
   verifiedAt     DateTime?
   userId         String
   createdAt      DateTime     @default(now())
@@ -121,7 +118,7 @@ model DomainRecord {
   type     String
   name     String
   value    String
-  status   DomainRecordStatus @default(pending)
+  status   DomainRecordStatus @default(PENDING)
   domainId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

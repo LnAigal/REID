@@ -5,6 +5,7 @@ const base = {
   JWT_SECRET: 'a'.repeat(32),
   CSRF_SECRET: 'b'.repeat(32),
   CORS_ORIGIN: 'http://localhost:3000',
+  APP_URL: 'http://localhost:3000',
   BREVO_API_KEY: 'x',
 };
 

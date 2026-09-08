@@ -56,9 +56,7 @@ export interface DomainData {
   name: string;
   status: DomainStatus;
   verificationToken: string;
-  spfRecord?: string;
-  dkimRecord?: string;
-  dmarcRecord?: string;
+  dkimSelector?: string;
   verifiedAt?: string;
   records: DomainRecordData[];
   createdAt: string;

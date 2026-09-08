@@ -39,7 +39,7 @@ export class CsrfGuard implements CanActivate {
 }
 
 export function setCsrfCookie(res: Response, raw: string, config: ConfigService): void {
-  const domain = cookieDomain();
+  const domain = cookieDomain(config);
   const isProduction = config.get('NODE_ENV') === 'production';
   res.cookie(CSRF_TOKEN_COOKIE, raw, {
     httpOnly: false,

@@ -166,7 +166,7 @@ export class AuthService {
       data: { verificationToken, verificationTokenExpires },
     });
 
-    const appUrl = this.config.get('APP_URL', 'http://localhost:3000');
+    const appUrl = this.config.get<string>('APP_URL');
     const verifyLink = `${appUrl}/verify-email?token=${verificationToken}`;
     const appName = this.config.get('APP_NAME', 'REID');
 
@@ -215,41 +215,39 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return { message: 'If that email exists, a reset link has been sent' };
-    }
+    if (user) {
+      const resetToken = randomUUID();
+      const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
 
-    const resetToken = randomUUID();
-    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { resetPasswordToken: resetToken, resetPasswordExpires: resetTokenExpires },
+      });
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { resetPasswordToken: resetToken, resetPasswordExpires: resetTokenExpires },
-    });
+      const appUrl = this.config.get<string>('APP_URL');
+      const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
+      const appName = this.config.get('APP_NAME', 'REID');
 
-    const appUrl = this.config.get('APP_URL', 'http://localhost:3000');
-    const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
-    const appName = this.config.get('APP_NAME', 'REID');
+      const result = await this.mailService.send({
+        from: this.config.get('VERIFICATION_FROM_EMAIL', 'noreply@reid.dev'),
+        to: [user.email],
+        subject: `Reset your ${appName} password`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+            <h2>Password Reset</h2>
+            <p>Click the button below to reset your password:</p>
+            <a href="${resetLink}" referrerpolicy="no-referrer" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a>
+            <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${resetLink}" referrerpolicy="no-referrer">${resetLink}</a></p>
+            <p style="color: #999; font-size: 12px;">This link expires in 1 hour.</p>
+            <p style="color: #999; font-size: 12px;">If you didn't request this, you can ignore this email.</p>
+          </div>
+        `,
+        text: `Reset your ${appName} password by visiting: ${resetLink}. This link expires in 1 hour.`,
+      });
 
-    const result = await this.mailService.send({
-      from: this.config.get('VERIFICATION_FROM_EMAIL', 'noreply@reid.dev'),
-      to: [user.email],
-      subject: `Reset your ${appName} password`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Password Reset</h2>
-          <p>Click the button below to reset your password:</p>
-          <a href="${resetLink}" referrerpolicy="no-referrer" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a>
-          <p style="margin-top: 24px; color: #666;">Or copy this link: <br/><a href="${resetLink}" referrerpolicy="no-referrer">${resetLink}</a></p>
-          <p style="color: #999; font-size: 12px;">This link expires in 1 hour.</p>
-          <p style="color: #999; font-size: 12px;">If you didn't request this, you can ignore this email.</p>
-        </div>
-      `,
-      text: `Reset your ${appName} password by visiting: ${resetLink}. This link expires in 1 hour.`,
-    });
-
-    if (!result.success) {
-      this.logger.error(`Password reset email send failed for ${user.id}: ${result.error}`);
+      if (!result.success) {
+        this.logger.error(`Password reset email send failed for ${user.id}: ${result.error}`);
+      }
     }
 
     return { message: 'If that email exists, a reset link has been sent' };
@@ -287,7 +285,7 @@ export class AuthService {
   }
 
   setAuthCookie(res: Response, token: string) {
-    const domain = cookieDomain();
+    const domain = cookieDomain(this.config);
     const isProduction = this.config.get('NODE_ENV') === 'production';
     res.cookie('token', token, {
       httpOnly: true,
@@ -299,7 +297,7 @@ export class AuthService {
   }
 
   clearAuthCookie(res: Response) {
-    const domain = cookieDomain();
+    const domain = cookieDomain(this.config);
     const isProduction = this.config.get('NODE_ENV') === 'production';
     res.clearCookie('token', {
       httpOnly: true,
